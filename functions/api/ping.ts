@@ -4,7 +4,7 @@
  * - Sends no-store headers to avoid edge/browser caching confusion.
  */
 
-export const onRequest: PagesFunction = async (ctx) => {
+export const onRequest: PagesFunction = async (ctx) =&gt; {
   /** Only allow GET to keep the function deterministic */
   if (ctx.request.method !== 'GET') {
     return new Response(
