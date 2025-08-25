@@ -1,24 +1,42 @@
 /**
- * Cloudflare Pages Functions - /api/ping
- * 간단한 헬스체크용 JSON을 반환합니다. 캐시를 사용하지 않도록 헤더를 설정합니다.
+ * Cloudflare Pages Function - Health Check (GET /api/ping)
+ * - Returns a small JSON to verify that Pages Functions routing works.
+ * - Sends no-cache headers to avoid any edge/browser caching confusion.
  */
 
 export const onRequest: PagesFunction = async (ctx) =&gt; {
-  const url = new URL(ctx.request.url)
+  /** Ensure only GET is allowed */
+  if (ctx.request.method !== 'GET') {
+    return new Response(
+      JSON.stringify({ ok: false, error: 'Method Not Allowed' }),
+      {
+        status: 405,
+        headers: {
+          'content-type': 'application/json; charset=utf-8',
+          'cache-control':
+            'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+        },
+      }
+    )
+  }
 
-  /** 응답 페이로드 */
+  /** Build a minimal payload for diagnostics */
+  const url = new URL(ctx.request.url)
   const payload = {
     ok: true,
-    name: 'ping',
+    message: 'pong',
     path: url.pathname,
-    hostname: url.hostname,
-    timestamp: new Date().toISOString(),
+    host: url.host,
+    ts: new Date().toISOString(),
   }
 
   return new Response(JSON.stringify(payload, null, 2), {
+    status: 200,
     headers: {
       'content-type': 'application/json; charset=utf-8',
-      'cache-control': 'no-store, no-cache, must-revalidate, max-age=0',
+      'cache-control':
+        'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+      'x-powered-by': 'cloudflare-pages-functions',
     },
   })
 }
