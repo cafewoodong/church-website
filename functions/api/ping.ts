@@ -1,11 +1,11 @@
 /**
  * Cloudflare Pages Function - Health Check (GET /api/ping)
- * - Returns a small JSON to verify that Pages Functions routing works.
- * - Sends no-cache headers to avoid any edge/browser caching confusion.
+ * - Returns a small JSON to verify that Pages Functions is working.
+ * - Sends no-store headers to avoid edge/browser caching confusion.
  */
 
-export const onRequest: PagesFunction = async (ctx) =&gt; {
-  /** Ensure only GET is allowed */
+export const onRequest: PagesFunction = async (ctx) => {
+  /** Only allow GET to keep the function deterministic */
   if (ctx.request.method !== 'GET') {
     return new Response(
       JSON.stringify({ ok: false, error: 'Method Not Allowed' }),
@@ -20,7 +20,7 @@ export const onRequest: PagesFunction = async (ctx) =&gt; {
     )
   }
 
-  /** Build a minimal payload for diagnostics */
+  /** Compose a minimal diagnostic payload */
   const url = new URL(ctx.request.url)
   const payload = {
     ok: true,
