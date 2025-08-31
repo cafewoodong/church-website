@@ -1,26 +1,15 @@
 /**
  * Cloudflare Pages Function - Health Check (GET /api/ping)
- * - Returns a small JSON to verify that Pages Functions is working.
- * - Sends no-store headers to avoid edge/browser caching confusion.
+ * - Minimal, deterministic JSON response to verify Functions are working.
+ * - Uses onRequestGet so only GET is handled; avoids manual method branching.
+ * - Sends no-store headers to prevent any cache confusion.
  */
 
-export const onRequest: PagesFunction = async (ctx) =&gt; {
-  /** Only allow GET to keep the function deterministic */
-  if (ctx.request.method !== 'GET') {
-    return new Response(
-      JSON.stringify({ ok: false, error: 'Method Not Allowed' }),
-      {
-        status: 405,
-        headers: {
-          'content-type': 'application/json; charset=utf-8',
-          'cache-control':
-            'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
-        },
-      }
-    )
-  }
-
-  /** Compose a minimal diagnostic payload */
+export const onRequestGet: PagesFunction = async (ctx) => {
+  /**
+   * Build a compact diagnostic payload.
+   * Includes path and host for quick validation in multi-domain setups.
+   */
   const url = new URL(ctx.request.url)
   const payload = {
     ok: true,
