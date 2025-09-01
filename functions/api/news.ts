@@ -1,163 +1,159 @@
 /**
- * Cloudflare Pages Function: /api/news
- * - Single entry (onRequest) that handles OPTIONS, GET, PUT to avoid method export detection issues.
- * - Data store: Cloudflare KV (env.NEWS_KV) under key "posts".
+ * Cloudflare Pages Function - News API (GET, POST)
+ * - GET /api/news         : list posts (date desc)
+ * - POST /api/news        : create a new post
  *
- * Security & CORS
- * - Allow-list specific origins, fallback to "*" for read-only scenarios.
- * - OPTIONS preflight returns 204 with proper headers.
- *
- * Contracts
- * - GET: return JSON array (fallback to [] if invalid KV value)
- * - PUT: overwrite all posts with JSON array payload
- *
- * Notes
- * - Keeping implementation self-contained to reduce Cloudflare "per-method export" edge cases (405).
+ * Security model:
+ * - Uses Supabase service_role on server-side (env SUPABASE_SERVICE_ROLE_KEY)
+ * - Keep this key ONLY in the Pages env, never ship to the client.
  */
 
-export interface Env {
-  /** Cloudflare KV namespace binding (Pages Settings variable name: NEWS_KV) */
-  NEWS_KV: KVNamespace
+import { createClient } from '@supabase/supabase-js'
+
+/** DB row shape (snake_case) */
+interface DbNewsRow {
+  id: number
+  title: string
+  date: string
+  category: '주보' | '공지사항' | '행사안내'
+  content: string
+  file_url?: string | null
+  file_name?: string | null
+  file_size?: string | null
+  views: number
+  is_new: boolean
+  show_on_home: boolean
+  image_url?: string | null
+  created_at?: string
+  updated_at?: string
 }
 
-/** Allowed origins for CORS */
-const ALLOWED_ORIGINS = new Set<string>([
-  'https://woodong.or.kr',
-  'https://woodong-church.pages.dev',
-  // Local development
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-])
-
-/**
- * Resolve allowed origin from request.
- * If origin is not in allow-list, return null to fallback to "*".
- */
-function resolveAllowedOrigin(req: Request): string | null {
-  const origin = req.headers.get('origin')
-  if (origin && ALLOWED_ORIGINS.has(origin)) return origin
-  return null
+/** API shape (camelCase) for client */
+interface ApiNewsPost {
+  id?: number
+  title: string
+  date: string
+  category: '주보' | '공지사항' | '행사안내'
+  content: string
+  fileUrl?: string
+  fileName?: string
+  fileSize?: string
+  views?: number
+  isNew?: boolean
+  showOnHome?: boolean
+  imageUrl?: string
 }
 
-/** Build common CORS headers */
-function buildCorsHeaders(req: Request) {
-  const allowOrigin = resolveAllowedOrigin(req) || '*'
+/** Convert DB row -> API camelCase */
+function toApi(row: DbNewsRow): ApiNewsPost {
   return {
-    'Access-Control-Allow-Origin': allowOrigin,
-    'Access-Control-Allow-Methods': 'GET,PUT,OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Accept, Authorization',
-    'Access-Control-Max-Age': '86400',
-    Vary: 'Origin',
+    id: row.id,
+    title: row.title,
+    date: row.date,
+    category: row.category,
+    content: row.content,
+    fileUrl: row.file_url ?? undefined,
+    fileName: row.file_name ?? undefined,
+    fileSize: row.file_size ?? undefined,
+    views: row.views,
+    isNew: row.is_new,
+    showOnHome: row.show_on_home,
+    imageUrl: row.image_url ?? undefined,
   }
 }
 
-/**
- * JSON response helper
- * @param data - JSON serializable data
- * @param init - Response init
- * @param extraHeaders - Extra headers merged after defaults
- */
-function json(
-  data: unknown,
-  init: ResponseInit = {},
-  extraHeaders: Record<string, string> = {}
-) {
-  return new Response(JSON.stringify(data), {
-    ...init,
-    headers: {
-      'content-type': 'application/json; charset=utf-8',
-      'cache-control': 'no-store',
-      ...extraHeaders,
-      ...(init.headers as Record<string, string>),
-    },
+/** Convert API body -> DB row (partial) */
+function toDb(body: Partial<ApiNewsPost>): Partial<DbNewsRow> {
+  const out: Partial<DbNewsRow> = {}
+  if (typeof body.title === 'string') out.title = body.title.trim()
+  if (typeof body.date === 'string') out.date = body.date.trim()
+  if (typeof body.category === 'string') out.category = body.category as DbNewsRow['category']
+  if (typeof body.content === 'string') out.content = body.content
+  if ('fileUrl' in body) out.file_url = body.fileUrl ?? null
+  if ('fileName' in body) out.file_name = body.fileName ?? null
+  if ('fileSize' in body) out.file_size = body.fileSize ?? null
+  if (typeof body.views === 'number') out.views = body.views
+  if ('isNew' in body) out.is_new = Boolean(body.isNew)
+  if ('showOnHome' in body) out.show_on_home = Boolean(body.showOnHome)
+  if ('imageUrl' in body) out.image_url = body.imageUrl ?? null
+  return out
+}
+
+/** JSON response helper */
+function json(data: unknown, init: ResponseInit = {}): Response {
+  const headers = new Headers(init.headers || {})
+  headers.set('content-type', 'application/json; charset=utf-8')
+  headers.set('cache-control', 'no-store')
+  return new Response(JSON.stringify(data), { ...init, headers })
+}
+
+/** Build admin supabase client (service_role) */
+function getAdminClient(env: any) {
+  const url = env.SUPABASE_URL
+  const key = env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) {
+    throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in Pages environment')
+  }
+  return createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { fetch },
   })
 }
 
-/**
- * Handle OPTIONS preflight
- * @param request - incoming request
- */
-function handleOptions(request: Request) {
-  return new Response(null, {
-    status: 204,
-    headers: buildCorsHeaders(request),
-  })
+/** Validate minimal fields for create */
+function validateCreate(body: any): { ok: boolean; error?: string } {
+  if (!body || typeof body !== 'object') return { ok: false, error: 'Invalid JSON body' }
+  if (!body.title || typeof body.title !== 'string') return { ok: false, error: 'title is required' }
+  if (!body.date || typeof body.date !== 'string') return { ok: false, error: 'date is required (YYYY-MM-DD)' }
+  if (!['주보', '공지사항', '행사안내'].includes(body.category)) return { ok: false, error: 'invalid category' }
+  return { ok: true }
 }
 
-/**
- * Main entry: route by HTTP method to avoid Cloudflare per-method export edge cases.
- */
-export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
-  const method = request.method.toUpperCase()
+export const onRequest: PagesFunction = async (ctx) => {
+  const method = ctx.request.method.toUpperCase()
+  const table = (ctx.env as any).SUPABASE_TABLE || 'news_posts'
 
-  // OPTIONS
-  if (method === 'OPTIONS') {
-    return handleOptions(request)
-  }
+  try {
+    const supabase = getAdminClient(ctx.env)
 
-  // GET
-  if (method === 'GET') {
-    try {
-      const raw = (await env.NEWS_KV.get('posts')) || '[]'
-      let parsed: unknown = []
-      try {
-        parsed = JSON.parse(raw)
-        if (!Array.isArray(parsed)) parsed = []
-      } catch {
-        parsed = []
-      }
-      return json(parsed, { status: 200 }, buildCorsHeaders(request))
-    } catch (e) {
-      return json(
-        { error: 'KV_READ_FAILED', message: e instanceof Error ? e.message : String(e) },
-        { status: 500 },
-        buildCorsHeaders(request)
-      )
+    if (method === 'GET') {
+      // List posts (date desc)
+      const { data, error } = await supabase
+        .from<DbNewsRow>(table)
+        .select('*')
+        .order('date', { ascending: false })
+      if (error) throw error
+      const items = (data || []).map(toApi)
+      return json({ ok: true, count: items.length, items })
     }
-  }
 
-  // PUT
-  if (method === 'PUT') {
-    try {
-      const ctype = request.headers.get('content-type') || ''
-      if (!ctype.toLowerCase().includes('application/json')) {
-        return json(
-          { error: 'UNSUPPORTED_MEDIA_TYPE', message: 'content-type must be application/json' },
-          { status: 415, headers: { Allow: 'GET,PUT,OPTIONS' } },
-          buildCorsHeaders(request)
-        )
+    if (method === 'POST') {
+      const body = await ctx.request.json().catch(() => null)
+      const v = validateCreate(body)
+      if (!v.ok) return json({ ok: false, error: v.error }, { status: 400 })
+
+      // Defaults for optional fields
+      const dbRow: Partial<DbNewsRow> = {
+        title: body.title,
+        date: body.date,
+        category: body.category,
+        content: body.content ?? '',
+        file_url: body.fileUrl ?? null,
+        file_name: body.fileName ?? null,
+        file_size: body.fileSize ?? null,
+        views: typeof body.views === 'number' ? body.views : 0,
+        is_new: Boolean(body.isNew),
+        show_on_home: Boolean(body.showOnHome),
+        image_url: body.imageUrl ?? null,
       }
 
-      const body = await request.json<unknown>()
-      if (!Array.isArray(body)) {
-        return json(
-          { error: 'INVALID_PAYLOAD', message: 'payload must be an array of posts' },
-          { status: 400, headers: { Allow: 'GET,PUT,OPTIONS' } },
-          buildCorsHeaders(request)
-        )
-      }
-
-      const serialized = JSON.stringify(body)
-      await env.NEWS_KV.put('posts', serialized)
-
-      return json(
-        { ok: true, count: body.length },
-        { status: 200, headers: { Allow: 'GET,PUT,OPTIONS' } },
-        buildCorsHeaders(request)
-      )
-    } catch (e) {
-      return json(
-        { error: 'KV_WRITE_FAILED', message: e instanceof Error ? e.message : String(e) },
-        { status: 500, headers: { Allow: 'GET,PUT,OPTIONS' } },
-        buildCorsHeaders(request)
-      )
+      const { data, error } = await supabase.from<DbNewsRow>(table).insert(dbRow).select('*').single()
+      if (error) throw error
+      return json({ ok: true, item: toApi(data!) }, { status: 201 })
     }
-  }
 
-  // Method not allowed
-  return json(
-    { error: 'METHOD_NOT_ALLOWED', message: `Method ${method} not supported` },
-    { status: 405, headers: { Allow: 'GET,PUT,OPTIONS' } },
-    buildCorsHeaders(request)
-  )
+    return json({ ok: false, error: 'Method Not Allowed' }, { status: 405 })
+  } catch (e: any) {
+    return json({ ok: false, error: e?.message || String(e) }, { status: 500 })
+  }
 }
