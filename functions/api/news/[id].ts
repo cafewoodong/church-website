@@ -1,11 +1,18 @@
-/**
- * Cloudflare Pages Function - News Item API (PUT, DELETE)
- * - PUT /api/news/:id     : update a post (partial)
- * - DELETE /api/news/:id  : delete a post
- */
-
+/**  
+ * Cloudflare Pages Function - News Item API (PUT, DELETE)  
+ * - PUT /api/news/:id     : update a post (admin token required)  
+ * - DELETE /api/news/:id  : delete a post (admin token required)  
+ *  
+ * Security model:  
+ * - Uses Supabase service_role on server-side (env SUPABASE_SERVICE_ROLE_KEY)  
+ * - Additional admin authentication with env ADMIN_TOKEN for mutating methods.  
+ *   Clients must send either:  
+ *     - Header: x-admin-token: &lt;token&gt;  
+ *     - or Authorization: Bearer &lt;token&gt;  
+ */  
 import { createClient } from '@supabase/supabase-js'
 
+/** DB row shape */
 interface DbNewsRow {
   id: number
   title: string
@@ -21,6 +28,7 @@ interface DbNewsRow {
   image_url?: string | null
 }
 
+/** Partial API shape for updates */
 interface ApiNewsPost {
   title?: string
   date?: string
@@ -73,6 +81,27 @@ function toDb(body: Partial<ApiNewsPost>): Partial<DbNewsRow> {
   return out
 }
 
+/** Read ADMIN_TOKEN from environment */
+function getEnvAdminToken(env: any): string | undefined {
+  const t = env.ADMIN_TOKEN
+  if (typeof t === 'string' && t.trim().length > 0) return t.trim()
+  return undefined
+}
+
+/** Extract admin token from request headers (x-admin-token or Bearer) */
+function readAdminTokenFromRequest(req: Request): string | null {
+  const h = req.headers.get('x-admin-token')?.trim()
+  if (h) return h
+  const auth = req.headers.get('authorization') || req.headers.get('Authorization')
+  if (!auth) return null
+  const m = auth.match(/^Bearer\s+(.+)$/i)
+  return m ? m[1].trim() : null
+}
+
+/**
+ * Item route handler
+ * - PUT/PATCH and DELETE require ADMIN_TOKEN header validation.
+ */
 export const onRequest: PagesFunction = async (ctx) => {
   const method = ctx.request.method.toUpperCase()
   const table = (ctx.env as any).SUPABASE_TABLE || 'news_posts'
@@ -84,6 +113,24 @@ export const onRequest: PagesFunction = async (ctx) => {
 
   try {
     const supabase = getAdminClient(ctx.env)
+
+    if (method === 'PUT' || method === 'PATCH' || method === 'DELETE') {
+      // Admin auth guard
+      const expected = getEnvAdminToken(ctx.env)
+      if (!expected) {
+        return json({ ok: false, error: 'Server misconfiguration: ADMIN_TOKEN is not set' }, { status: 500 })
+      }
+      const provided = readAdminTokenFromRequest(ctx.request)
+      if (!provided) {
+        return json(
+          { ok: false, error: 'Missing admin token' },
+          { status: 401, headers: { 'www-authenticate': 'Bearer realm="admin", charset="UTF-8"' } }
+        )
+      }
+      if (provided !== expected) {
+        return json({ ok: false, error: 'Invalid admin token' }, { status: 403 })
+      }
+    }
 
     if (method === 'PUT' || method === 'PATCH') {
       const body = (await ctx.request.json().catch(() => ({}))) as Partial<ApiNewsPost>

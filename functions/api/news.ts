@@ -1,13 +1,15 @@
-/**
- * Cloudflare Pages Function - News API (GET, POST)
- * - GET /api/news         : list posts (date desc)
- * - POST /api/news        : create a new post
- *
- * Security model:
- * - Uses Supabase service_role on server-side (env SUPABASE_SERVICE_ROLE_KEY)
- * - Keep this key ONLY in the Pages env, never ship to the client.
- */
-
+/**  
+ * Cloudflare Pages Function - News API (GET, POST)  
+ * - GET /api/news         : list posts (date desc, public)  
+ * - POST /api/news        : create a new post (admin token required)  
+ *  
+ * Security model:  
+ * - Uses Supabase service_role on server-side (env SUPABASE_SERVICE_ROLE_KEY)  
+ * - Additional admin authentication with env ADMIN_TOKEN for mutating methods.  
+ *   Clients must send either:  
+ *     - Header: x-admin-token: &lt;token&gt;  
+ *     - or Authorization: Bearer &lt;token&gt;  
+ */  
 import { createClient } from '@supabase/supabase-js'
 
 /** DB row shape (snake_case) */
@@ -100,15 +102,28 @@ function getAdminClient(env: any) {
   })
 }
 
-/** Validate minimal fields for create */
-function validateCreate(body: any): { ok: boolean; error?: string } {
-  if (!body || typeof body !== 'object') return { ok: false, error: 'Invalid JSON body' }
-  if (!body.title || typeof body.title !== 'string') return { ok: false, error: 'title is required' }
-  if (!body.date || typeof body.date !== 'string') return { ok: false, error: 'date is required (YYYY-MM-DD)' }
-  if (!['주보', '공지사항', '행사안내'].includes(body.category)) return { ok: false, error: 'invalid category' }
-  return { ok: true }
+/** Read ADMIN_TOKEN from environment (non-empty string) */
+function getEnvAdminToken(env: any): string | undefined {
+  const t = env.ADMIN_TOKEN
+  if (typeof t === 'string' && t.trim().length > 0) return t.trim()
+  return undefined
 }
 
+/** Extract admin token from request headers (x-admin-token or Bearer) */
+function readAdminTokenFromRequest(req: Request): string | null {
+  const h = req.headers.get('x-admin-token')?.trim()
+  if (h) return h
+  const auth = req.headers.get('authorization') || req.headers.get('Authorization')
+  if (!auth) return null
+  const m = auth.match(/^Bearer\s+(.+)$/i)
+  return m ? m[1].trim() : null
+}
+
+/**
+ * App route handler
+ * - GET is public.
+ * - POST requires ADMIN_TOKEN header validation.
+ */
 export const onRequest: PagesFunction = async (ctx) => {
   const method = ctx.request.method.toUpperCase()
   const table = (ctx.env as any).SUPABASE_TABLE || 'news_posts'
@@ -128,6 +143,22 @@ export const onRequest: PagesFunction = async (ctx) => {
     }
 
     if (method === 'POST') {
+      // Admin auth guard
+      const expected = getEnvAdminToken(ctx.env)
+      if (!expected) {
+        return json({ ok: false, error: 'Server misconfiguration: ADMIN_TOKEN is not set' }, { status: 500 })
+      }
+      const provided = readAdminTokenFromRequest(ctx.request)
+      if (!provided) {
+        return json(
+          { ok: false, error: 'Missing admin token' },
+          { status: 401, headers: { 'www-authenticate': 'Bearer realm="admin", charset="UTF-8"' } }
+        )
+      }
+      if (provided !== expected) {
+        return json({ ok: false, error: 'Invalid admin token' }, { status: 403 })
+      }
+
       const body = await ctx.request.json().catch(() => null)
       const v = validateCreate(body)
       if (!v.ok) return json({ ok: false, error: v.error }, { status: 400 })
@@ -156,4 +187,13 @@ export const onRequest: PagesFunction = async (ctx) => {
   } catch (e: any) {
     return json({ ok: false, error: e?.message || String(e) }, { status: 500 })
   }
+}
+
+/** Validate minimal fields for create */
+function validateCreate(body: any): { ok: boolean; error?: string } {
+  if (!body || typeof body !== 'object') return { ok: false, error: 'Invalid JSON body' }
+  if (!body.title || typeof body.title !== 'string') return { ok: false, error: 'title is required' }
+  if (!body.date || typeof body.date !== 'string') return { ok: false, error: 'date is required (YYYY-MM-DD)' }
+  if (!['주보', '공지사항', '행사안내'].includes(body.category)) return { ok: false, error: 'invalid category' }
+  return { ok: true }
 }
