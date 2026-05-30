@@ -20,9 +20,9 @@ export default function PostEditor() {
   const isEdit = Boolean(id)
 
   const [form, setForm] = useState(EMPTY_FORM)
-  const [imageFile, setImageFile] = useState(null)
-  const [imagePreview, setImagePreview] = useState(null)
-  const [currentImageUrl, setCurrentImageUrl] = useState(null)
+  const [imageFiles, setImageFiles] = useState([])
+  const [imagePreviews, setImagePreviews] = useState([])
+  const [currentImageUrls, setCurrentImageUrls] = useState([])
   const [loadingPost, setLoadingPost] = useState(isEdit)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -46,7 +46,15 @@ export default function PostEditor() {
             tags: Array.isArray(data.tags) ? data.tags.join(', ') : (data.tags ?? ''),
             is_published: data.is_published ?? false,
           })
-          setCurrentImageUrl(data.image_url ?? null)
+          const raw = data.image_url ?? null
+          if (raw) {
+            try {
+              const parsed = JSON.parse(raw)
+              setCurrentImageUrls(Array.isArray(parsed) ? parsed : [raw])
+            } catch {
+              setCurrentImageUrls([raw])
+            }
+          }
         }
         setLoadingPost(false)
       })
@@ -58,10 +66,14 @@ export default function PostEditor() {
   }
 
   function handleImageChange(e) {
-    const file = e.target.files[0]
-    if (!file) return
-    setImageFile(file)
-    setImagePreview(URL.createObjectURL(file))
+    const files = Array.from(e.target.files)
+    if (!files.length) return
+    setImageFiles(files)
+    setImagePreviews(files.map((f) => URL.createObjectURL(f)))
+  }
+
+  function removeCurrentImage(idx) {
+    setCurrentImageUrls((prev) => prev.filter((_, i) => i !== idx))
   }
 
   async function handleSubmit(e) {
@@ -74,10 +86,14 @@ export default function PostEditor() {
     setError('')
 
     try {
-      let image_url = currentImageUrl
-      if (imageFile) {
-        image_url = await uploadNewsImage(imageFile)
+      let allUrls = [...currentImageUrls]
+      if (imageFiles.length > 0) {
+        const uploaded = await Promise.all(imageFiles.map((f) => uploadNewsImage(f)))
+        allUrls = [...allUrls, ...uploaded]
       }
+      const image_url = allUrls.length === 0 ? null
+        : allUrls.length === 1 ? allUrls[0]
+        : JSON.stringify(allUrls)
 
       const tagsArray = form.tags
         .split(',')
@@ -113,8 +129,6 @@ export default function PostEditor() {
   if (loadingPost) {
     return <div className="text-center py-20 text-gray-400 text-sm">글을 불러오는 중...</div>
   }
-
-  const previewSrc = imagePreview ?? currentImageUrl
 
   return (
     <div className="max-w-2xl">
@@ -206,20 +220,43 @@ export default function PostEditor() {
         {/* 이미지 */}
         <div>
           <label className="block text-xs font-semibold text-gray-600 mb-2">이미지</label>
-          {previewSrc && (
-            <div className="mb-3 rounded-xl overflow-hidden border border-gray-100 aspect-video max-w-xs">
-              <img src={previewSrc} alt="미리보기" className="w-full h-full object-cover" />
+
+          {/* 기존 저장된 이미지 */}
+          {currentImageUrls.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {currentImageUrls.map((url, i) => (
+                <div key={i} className="relative w-24 h-24 rounded-xl overflow-hidden border border-gray-100">
+                  <img src={url} alt={`이미지 ${i + 1}`} className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removeCurrentImage(i)}
+                    className="absolute top-1 right-1 w-5 h-5 bg-black/50 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-500"
+                  >×</button>
+                </div>
+              ))}
             </div>
           )}
+
+          {/* 새 이미지 미리보기 */}
+          {imagePreviews.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {imagePreviews.map((src, i) => (
+                <div key={i} className="relative w-24 h-24 rounded-xl overflow-hidden border border-church-green/30">
+                  <img src={src} alt={`새 이미지 ${i + 1}`} className="w-full h-full object-cover" />
+                  <span className="absolute bottom-0 inset-x-0 text-center text-[10px] bg-church-green/70 text-white py-0.5">새 이미지</span>
+                </div>
+              ))}
+            </div>
+          )}
+
           <input
             type="file"
             accept="image/*"
+            multiple
             onChange={handleImageChange}
             className="text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-church-bg file:text-church-green hover:file:bg-church-green hover:file:text-white file:transition-colors cursor-pointer"
           />
-          <p className="text-xs text-gray-300 mt-1.5">
-            Supabase Storage <code className="font-mono">news-images</code> 버킷에 업로드됩니다.
-          </p>
+          <p className="text-xs text-gray-300 mt-1.5">여러 장 선택 가능 · 기존 이미지에 추가됩니다</p>
         </div>
 
         {/* 공개 여부 */}

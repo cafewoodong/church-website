@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { CHURCH_NAME } from '../constants'
 
 const PLACEHOLDER_GRADIENT = {
@@ -38,11 +39,22 @@ function IconShare() {
   )
 }
 
+function parseImageUrls(imageUrl) {
+  if (!imageUrl) return []
+  try {
+    const parsed = JSON.parse(imageUrl)
+    if (Array.isArray(parsed)) return parsed
+  } catch {}
+  return [imageUrl]
+}
+
 // item 필드: id, category, title, summary, content, tags, image_url, published, created_at
 export default function NewsCard({ item }) {
   const { category, title, summary, tags = [], image_url, created_at } = item
   const grad = PLACEHOLDER_GRADIENT[category] ?? DEFAULT_GRADIENT
   const displayDate = formatDate(created_at)
+  const imageUrls = parseImageUrls(image_url)
+  const [imgIdx, setImgIdx] = useState(0)
 
   return (
     <article className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
@@ -66,13 +78,41 @@ export default function NewsCard({ item }) {
         className="relative aspect-video overflow-hidden"
         style={{ background: `linear-gradient(135deg, ${grad.from}, ${grad.to})` }}
       >
-        {image_url ? (
-          <img src={image_url} alt={title} className="w-full h-full object-cover" />
+        {imageUrls.length > 0 ? (
+          <img src={imageUrls[imgIdx]} alt={title} className="w-full h-full object-cover" />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
             <IconCross style={{ width: 120, height: 120, color: '#2F7D6D', opacity: 0.07 }} />
           </div>
         )}
+
+        {/* 여러 장일 때 좌우 버튼 */}
+        {imageUrls.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={() => setImgIdx((i) => (i - 1 + imageUrls.length) % imageUrls.length)}
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-black/40 text-white rounded-full flex items-center justify-center text-sm hover:bg-black/60"
+            >‹</button>
+            <button
+              type="button"
+              onClick={() => setImgIdx((i) => (i + 1) % imageUrls.length)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-black/40 text-white rounded-full flex items-center justify-center text-sm hover:bg-black/60"
+            >›</button>
+            {/* 점 인디케이터 */}
+            <div className="absolute bottom-8 inset-x-0 flex justify-center gap-1">
+              {imageUrls.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setImgIdx(i)}
+                  className={`w-1.5 h-1.5 rounded-full transition-colors ${i === imgIdx ? 'bg-white' : 'bg-white/50'}`}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
         <div className="absolute bottom-3 left-3">
           <span className="text-[11px] font-semibold bg-white/80 backdrop-blur-sm text-church-green px-2.5 py-1 rounded-full border border-white/60">
             {category}
