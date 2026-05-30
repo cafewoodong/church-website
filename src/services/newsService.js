@@ -61,3 +61,25 @@ export async function uploadNewsImage(file) {
   const { data } = supabase.storage.from('news-images').getPublicUrl(path)
   return data.publicUrl
 }
+
+export async function toggleReaction(postId, reactionType, isAdding) {
+  if (!supabase) return null
+  try {
+    const { data, error } = await supabase.rpc('toggle_reaction', {
+      p_post_id: postId,
+      p_reaction: reactionType,
+      p_adding: isAdding,
+    })
+    if (error) throw error
+    return data
+  } catch {
+    return null
+  }
+}
+
+export async function incrementView(postId) {
+  if (!supabase) return
+  try {
+    await supabase.rpc('increment_view', { p_post_id: postId })
+  } catch {}
+}

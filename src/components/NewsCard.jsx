@@ -1,5 +1,13 @@
-import { useState } from 'react'
-import { CHURCH_NAME } from '../constants'
+import { useState, useEffect, useRef } from 'react'
+import { CHURCH_NAME, CHURCH_EMAIL } from '../constants'
+import { toggleReaction, incrementView } from '../services/newsService'
+
+const REACTIONS = [
+  { type: '기도해요', emoji: '🙏' },
+  { type: '좋아요', emoji: '👍' },
+  { type: '함께해요', emoji: '🤝' },
+  { type: '아멘', emoji: '🙌' },
+]
 
 const PLACEHOLDER_GRADIENT = {
   공지: { from: '#EEF4FB', to: '#E4EDF7' },
@@ -28,17 +36,6 @@ function IconCross({ className = '', style }) {
   )
 }
 
-function IconShare() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-      strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-      <polyline points="16 6 12 2 8 6" />
-      <line x1="12" y1="2" x2="12" y2="15" />
-    </svg>
-  )
-}
-
 function parseImageUrls(imageUrl) {
   if (!imageUrl) return []
   try {
@@ -48,13 +45,67 @@ function parseImageUrls(imageUrl) {
   return [imageUrl]
 }
 
-// item 필드: id, category, title, summary, content, tags, image_url, published, created_at
+function getMyReactions(postId) {
+  try {
+    const stored = localStorage.getItem(`nr_${postId}`)
+    return stored ? JSON.parse(stored) : []
+  } catch {
+    return []
+  }
+}
+
+function saveMyReactions(postId, list) {
+  try {
+    localStorage.setItem(`nr_${postId}`, JSON.stringify(list))
+  } catch {}
+}
+
 export default function NewsCard({ item }) {
-  const { category, title, summary, tags = [], image_url, created_at } = item
+  const { id, category, title, summary, tags = [], image_url, created_at, reactions: initReactions, view_count } = item
   const grad = PLACEHOLDER_GRADIENT[category] ?? DEFAULT_GRADIENT
   const displayDate = formatDate(created_at)
   const imageUrls = parseImageUrls(image_url)
   const [imgIdx, setImgIdx] = useState(0)
+
+  const [reactions, setReactions] = useState(
+    initReactions && typeof initReactions === 'object'
+      ? { 기도해요: 0, 좋아요: 0, 함께해요: 0, 아멘: 0, ...initReactions }
+      : { 기도해요: 0, 좋아요: 0, 함께해요: 0, 아멘: 0 }
+  )
+  const [myReactions, setMyReactions] = useState(() => getMyReactions(id))
+  const [viewCount, setViewCount] = useState(view_count ?? 0)
+  const viewedRef = useRef(false)
+
+  // 조회수: 세션당 1회만 증가
+  useEffect(() => {
+    if (viewedRef.current) return
+    viewedRef.current = true
+    const key = `vw_${id}`
+    if (sessionStorage.getItem(key)) return
+    sessionStorage.setItem(key, '1')
+    incrementView(id).then(() => setViewCount((v) => v + 1))
+  }, [id])
+
+  const handleReaction = async (type) => {
+    const already = myReactions.includes(type)
+    const newMine = already ? myReactions.filter((r) => r !== type) : [...myReactions, type]
+    setMyReactions(newMine)
+    saveMyReactions(id, newMine)
+    setReactions((prev) => ({
+      ...prev,
+      [type]: Math.max(0, (prev[type] ?? 0) + (already ? -1 : 1)),
+    }))
+    await toggleReaction(id, type, !already)
+  }
+
+  const handleShare = async () => {
+    try {
+      await navigator.share({ title, text: summary, url: window.location.href })
+    } catch {
+      await navigator.clipboard.writeText(window.location.href)
+      alert('링크가 복사되었습니다.')
+    }
+  }
 
   return (
     <article className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
@@ -67,9 +118,16 @@ export default function NewsCard({ item }) {
         >
           <IconCross className="w-4 h-4 text-white" />
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold text-church-text leading-none">{CHURCH_NAME}</p>
           <p className="text-xs text-gray-400 mt-0.5">{category} · {displayDate}</p>
+        </div>
+        <div className="flex items-center gap-1 text-xs text-gray-300 shrink-0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+          <span>{viewCount}</span>
         </div>
       </div>
 
@@ -86,7 +144,6 @@ export default function NewsCard({ item }) {
           </div>
         )}
 
-        {/* 여러 장일 때 좌우 버튼 */}
         {imageUrls.length > 1 && (
           <>
             <button
@@ -99,13 +156,9 @@ export default function NewsCard({ item }) {
               onClick={() => setImgIdx((i) => (i + 1) % imageUrls.length)}
               className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-black/40 text-white rounded-full flex items-center justify-center text-sm hover:bg-black/60"
             >›</button>
-            {/* 점 인디케이터 */}
             <div className="absolute bottom-8 inset-x-0 flex justify-center gap-1">
               {imageUrls.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setImgIdx(i)}
+                <button key={i} type="button" onClick={() => setImgIdx(i)}
                   className={`w-1.5 h-1.5 rounded-full transition-colors ${i === imgIdx ? 'bg-white' : 'bg-white/50'}`}
                 />
               ))}
@@ -131,35 +184,56 @@ export default function NewsCard({ item }) {
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {tags.map((tag) => (
-              <span key={tag} className="text-[11px] text-church-green font-medium">
-                {tag}
-              </span>
+              <span key={tag} className="text-[11px] text-church-green font-medium">{tag}</span>
             ))}
           </div>
         )}
       </div>
 
-      {/* 액션 영역 */}
+      {/* 반응 버튼 */}
+      <div className="px-3 pt-2 pb-1 flex flex-wrap gap-1.5">
+        {REACTIONS.map(({ type, emoji }) => {
+          const count = reactions[type] ?? 0
+          const active = myReactions.includes(type)
+          return (
+            <button
+              key={type}
+              type="button"
+              onClick={() => handleReaction(type)}
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                active
+                  ? 'bg-church-green text-white border-church-green'
+                  : 'bg-gray-50 text-gray-500 border-gray-100 hover:border-church-green hover:text-church-green'
+              }`}
+            >
+              <span>{emoji}</span>
+              <span>{type}</span>
+              {count > 0 && <span className={active ? 'text-white/80' : 'text-gray-400'}>{count}</span>}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* 하단 액션 */}
       <div className="flex items-center gap-1 px-3 py-2.5 border-t border-gray-100 mt-1">
-        <button
-          type="button"
-          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs text-gray-500 hover:bg-church-bg hover:text-church-green transition-colors"
-        >
-          <span>🙏</span>
-          <span>기도해요</span>
-        </button>
-        <button
-          type="button"
+        <a
+          href={`mailto:${CHURCH_EMAIL}?subject=${encodeURIComponent(title)}`}
           className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs text-gray-500 hover:bg-church-bg hover:text-church-green transition-colors"
         >
           <span>💬</span>
           <span>문의</span>
-        </button>
+        </a>
         <button
           type="button"
+          onClick={handleShare}
           className="flex items-center gap-1.5 ml-auto px-2.5 py-1.5 rounded-lg text-xs text-gray-500 hover:bg-church-bg hover:text-church-green transition-colors"
         >
-          <IconShare />
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+            strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+            <polyline points="16 6 12 2 8 6" />
+            <line x1="12" y1="2" x2="12" y2="15" />
+          </svg>
           <span>공유</span>
         </button>
       </div>
