@@ -62,8 +62,14 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-white/10 pt-6 text-center text-xs text-gray-500">
-          © {new Date().getFullYear()} {CHURCH_NAME}. All rights reserved.
+        <div className="border-t border-white/10 pt-6 flex items-center justify-center gap-4 text-xs text-gray-500">
+          <span>© {new Date().getFullYear()} {CHURCH_NAME}. All rights reserved.</span>
+          <Link
+            to="/admin/login"
+            className="text-gray-600 hover:text-gray-400 transition-colors"
+          >
+            관리자
+          </Link>
         </div>
       </div>
     </footer>

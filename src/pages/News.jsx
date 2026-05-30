@@ -1,17 +1,33 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import PageHeader from '../components/PageHeader'
 import NewsCard from '../components/NewsCard'
 import { getAllNews } from '../services/newsService'
+import { supabase } from '../lib/supabase'
+
+const ADMIN_EMAIL = 'ggcommchurch@gmail.com'
 
 export default function News() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
     getAllNews()
       .then(setItems)
       .catch(console.error)
       .finally(() => setLoading(false))
+  }, [])
+
+  useEffect(() => {
+    if (!supabase) return
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAdmin(session?.user?.email === ADMIN_EMAIL)
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setIsAdmin(session?.user?.email === ADMIN_EMAIL)
+    })
+    return () => subscription.unsubscribe()
   }, [])
 
   return (
@@ -33,6 +49,17 @@ export default function News() {
           )}
         </div>
       </section>
+
+      {/* 관리자 글쓰기 버튼 (로그인한 관리자에게만 표시) */}
+      {isAdmin && (
+        <Link
+          to="/admin/posts/new"
+          className="fixed bottom-6 right-6 w-14 h-14 bg-church-green hover:bg-church-green-dark text-white rounded-full shadow-lg flex items-center justify-center text-2xl font-light transition-colors z-50"
+          title="새 글 작성"
+        >
+          +
+        </Link>
+      )}
     </>
   )
 }
