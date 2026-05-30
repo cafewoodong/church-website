@@ -217,7 +217,9 @@ export default function NewsCard({ item }) {
       {/* 하단 액션 */}
       <div className="flex items-center gap-1 px-3 py-2.5 border-t border-gray-100 mt-1">
         <a
-          href={`mailto:${CHURCH_EMAIL}?subject=${encodeURIComponent(title)}`}
+          href="https://open.kakao.com/o/sHFd1kxi"
+          target="_blank"
+          rel="noopener noreferrer"
           className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs text-gray-500 hover:bg-church-bg hover:text-church-green transition-colors"
         >
           <span>💬</span>
