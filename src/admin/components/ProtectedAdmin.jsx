@@ -9,6 +9,10 @@ export default function ProtectedAdmin() {
   const [session, setSession] = useState(undefined) // undefined = 로딩 중
 
   useEffect(() => {
+    if (!supabase) {
+      setSession(null)
+      return
+    }
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => setSession(session))
     return () => subscription.unsubscribe()

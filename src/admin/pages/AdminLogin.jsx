@@ -11,6 +11,7 @@ export default function AdminLogin() {
 
   // 이미 로그인된 경우 /admin으로 이동
   useEffect(() => {
+    if (!supabase) return
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) navigate('/admin', { replace: true })
     })
@@ -19,6 +20,10 @@ export default function AdminLogin() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    if (!supabase) {
+      setError('수파베이스 연결 오류입니다. 관리자에게 문의하세요.')
+      return
+    }
     setLoading(true)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     setLoading(false)
