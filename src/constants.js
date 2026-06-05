@@ -6,7 +6,7 @@ export const CHURCH_DESC = '말씀과 기도, 찬양으로 함께 세워져 가�
 
 export const CHURCH_ADDRESS = '수원특례시 영통구 광교중앙로247, 상가동 202호'
 export const CHURCH_ZIPCODE = '16512'
-export const CHURCH_PHONE = '010-4952-8534'
+export const CHURCH_PHONE = '010-8477-8536'
 export const CHURCH_EMAIL = 'ggcommchurch@gmail.com'
 
 export const BANK_NAME = '농협은행'
