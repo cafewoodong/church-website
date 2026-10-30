@@ -1,22 +1,8 @@
-import { useState, useEffect } from 'react'
-import { getComments, addComment, deleteComment } from '../../services/newsService'
+import { useState, useEffect, useMemo } from 'react'
+import { getComments, deleteComment } from '../../services/newsService'
 import useAuthUser, { displayNameOf, signInWith, signOut, readAuthErrorFromUrl } from '../../hooks/useAuthUser'
-import { formatDateTime } from './newsUtils'
-
-const MAX_LEN = 500
-
-// 오류 원인을 알기 쉬운 문구로
-function commentErrorMessage(err) {
-  const msg = err?.message ?? ''
-  const code = err?.code ?? ''
-  console.error('[댓글 등록 실패]', err)
-  if (msg.includes('서버 미연결')) return '서버(Supabase)에 연결되어 있지 않아 저장할 수 없습니다.'
-  if (code === '42P01' || code === 'PGRST205') return '댓글 테이블이 아직 없습니다. (관리자: SQL 실행 필요)'
-  if (code === '42501' || msg.includes('row-level security')) return '로그인이 필요하거나, 공개되지 않은 게시물입니다.'
-  if (msg.includes('잠시 후 다시')) return '너무 빠르게 연속 등록했습니다. 30초 후 다시 시도해 주세요.'
-  if (msg.includes('fetch')) return '네트워크 오류입니다. 다시 시도해 주세요.'
-  return `댓글 등록에 실패했습니다. (${msg || '알 수 없는 오류'})`
-}
+import { formatDateTime, buildCommentTree } from './newsUtils'
+import ReplyForm from './ReplyForm'
 
 function KakaoIcon() {
   return (
@@ -68,14 +54,42 @@ function LoginPrompt() {
   )
 }
 
+function CommentItem({ c, isReply, canReply, canDelete, onReply, onDelete }) {
+  return (
+    <div className={`flex gap-3 ${isReply ? 'pt-3' : ''}`}>
+      <div className={`${isReply ? 'w-7 h-7' : 'w-8 h-8'} rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
+        c.is_official ? 'bg-church-green text-white' : 'bg-church-bg border border-gray-100 text-church-green'
+      }`}>
+        {c.is_official ? '✝' : c.author_name?.slice(0, 1)}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-sm font-semibold text-church-text">{c.author_name}</span>
+          {c.is_official && (
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-church-green/10 text-church-green">교회</span>
+          )}
+          <span className="text-[11px] text-gray-400">{formatDateTime(c.created_at)}</span>
+        </div>
+        <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap break-keep mt-0.5">{c.content}</p>
+        <div className="flex items-center gap-3 mt-1">
+          {canReply && (
+            <button type="button" onClick={onReply} className="text-[11px] text-gray-400 hover:text-church-green">답글</button>
+          )}
+          {canDelete && (
+            <button type="button" onClick={onDelete} className="text-[11px] text-gray-400 hover:text-red-500">삭제</button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function CommentSection({ postId, isAdmin }) {
   const user = useAuthUser()
   const [comments, setComments] = useState([])
   const [loading, setLoading] = useState(true)
   const [unavailable, setUnavailable] = useState(false)
-  const [content, setContent] = useState('')
-  const [sending, setSending] = useState(false)
-  const [error, setError] = useState('')
+  const [replyTo, setReplyTo] = useState(null)
 
   useEffect(() => {
     let alive = true
@@ -86,29 +100,20 @@ export default function CommentSection({ postId, isAdmin }) {
     return () => { alive = false }
   }, [postId])
 
+  const tree = useMemo(() => buildCommentTree(comments), [comments])
   const myName = user ? displayNameOf(user) : ''
+  const canDelete = (c) => isAdmin || (user && c.user_id && c.user_id === user.id)
 
-  async function handleSubmit(e) {
-    e.preventDefault()
-    if (!content.trim()) return setError('댓글 내용을 입력해 주세요.')
-    setSending(true)
-    setError('')
-    try {
-      const created = await addComment(postId, myName, content)
-      setComments((prev) => [...prev, created])
-      setContent('')
-    } catch (err) {
-      setError(commentErrorMessage(err))
-    } finally {
-      setSending(false)
-    }
+  const added = (created) => {
+    setComments((prev) => [...prev, created])
+    setReplyTo(null)
   }
 
   async function handleDelete(id) {
-    if (!confirm('이 댓글을 삭제할까요?')) return
+    if (!confirm('이 댓글을 삭제할까요? (답글도 함께 삭제됩니다)')) return
     try {
       await deleteComment(id)
-      setComments((prev) => prev.filter((c) => c.id !== id))
+      setComments((prev) => prev.filter((c) => c.id !== id && c.parent_id !== id))
     } catch {
       alert('삭제에 실패했습니다.')
     }
@@ -124,64 +129,65 @@ export default function CommentSection({ postId, isAdmin }) {
         <p className="text-xs text-gray-400 py-4">댓글을 불러오는 중...</p>
       ) : unavailable ? (
         <p className="text-xs text-gray-400 py-4">댓글을 불러올 수 없습니다. (서버 연결 또는 댓글 테이블 확인 필요)</p>
-      ) : comments.length === 0 ? (
+      ) : tree.length === 0 ? (
         <p className="text-xs text-gray-400 py-4">첫 댓글을 남겨 주세요. 🙏</p>
       ) : (
         <ul className="divide-y divide-gray-100 mb-4">
-          {comments.map((c) => {
-            const canDelete = isAdmin || (user && c.user_id && c.user_id === user.id)
-            return (
-              <li key={c.id} className="py-3 flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-church-bg border border-gray-100 flex items-center justify-center text-xs font-semibold text-church-green shrink-0">
-                  {c.author_name?.slice(0, 1)}
+          {tree.map((c) => (
+            <li key={c.id} className="py-3">
+              <CommentItem
+                c={c}
+                canReply={Boolean(user)}
+                canDelete={canDelete(c)}
+                onReply={() => setReplyTo(replyTo === c.id ? null : c.id)}
+                onDelete={() => handleDelete(c.id)}
+              />
+              {(c.replies.length > 0 || replyTo === c.id) && (
+                <div className="ml-11 mt-1 pl-3 border-l-2 border-gray-100">
+                  {c.replies.map((r) => (
+                    <CommentItem
+                      key={r.id}
+                      c={r}
+                      isReply
+                      canReply={false}
+                      canDelete={canDelete(r)}
+                      onDelete={() => handleDelete(r.id)}
+                    />
+                  ))}
+                  {replyTo === c.id && user && (
+                    <div className="pt-3">
+                      <ReplyForm
+                        postId={postId}
+                        parentId={c.id}
+                        authorName={myName}
+                        placeholder={`${c.author_name} 님에게 답글`}
+                        submitLabel="답글 등록"
+                        autoFocus
+                        compact
+                        onCreated={added}
+                        onCancel={() => setReplyTo(null)}
+                      />
+                    </div>
+                  )}
                 </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-church-text">{c.author_name}</span>
-                    <span className="text-[11px] text-gray-400">{formatDateTime(c.created_at)}</span>
-                    {canDelete && (
-                      <button type="button" onClick={() => handleDelete(c.id)}
-                        className="ml-auto text-[11px] text-gray-400 hover:text-red-500">삭제</button>
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap break-keep mt-0.5">{c.content}</p>
-                </div>
-              </li>
-            )
-          })}
+              )}
+            </li>
+          ))}
         </ul>
       )}
 
       {!unavailable && user === null && <LoginPrompt />}
 
       {!unavailable && user && (
-        <form onSubmit={handleSubmit} className="bg-church-bg rounded-xl p-3 space-y-2">
+        <div className="bg-church-bg rounded-xl p-3 space-y-2">
           <div className="flex items-center gap-2 text-xs text-gray-500">
-            <span><b className="text-church-text">{myName}</b> 님으로 작성</span>
+            <span><b className="text-church-text">{isAdmin ? '광교우리동네교회' : myName}</b> 님으로 작성</span>
             <button type="button" onClick={signOut} className="ml-auto text-gray-400 hover:text-church-green underline underline-offset-2">
               로그아웃
             </button>
           </div>
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            maxLength={MAX_LEN}
-            rows={3}
-            placeholder="따뜻한 댓글을 남겨 주세요."
-            className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-church-green"
-          />
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] text-gray-400">{content.length}/{MAX_LEN}</span>
-            {error && <span className="text-[11px] text-red-500">{error}</span>}
-            <button
-              type="submit"
-              disabled={sending}
-              className="ml-auto px-4 py-2 bg-church-green hover:bg-church-green-dark disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
-            >
-              {sending ? '등록 중...' : '댓글 등록'}
-            </button>
-          </div>
-        </form>
+          <ReplyForm postId={postId} authorName={myName} onCreated={added} />
+        </div>
       )}
     </section>
   )

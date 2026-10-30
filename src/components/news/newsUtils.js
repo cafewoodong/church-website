@@ -57,3 +57,32 @@ export async function sharePost({ id, title, summary }) {
     }
   }
 }
+
+// 댓글 등록 오류를 알기 쉬운 문구로
+export function commentErrorMessage(err) {
+  const msg = err?.message ?? ''
+  const code = err?.code ?? ''
+  console.error('[댓글 등록 실패]', err)
+  if (msg.includes('서버 미연결')) return '서버(Supabase)에 연결되어 있지 않아 저장할 수 없습니다.'
+  if (code === '42P01' || code === 'PGRST205') return '댓글 테이블이 아직 없습니다. (관리자: SQL 실행 필요)'
+  if (code === '42501' || msg.includes('row-level security')) return '로그인이 필요하거나, 공개되지 않은 게시물입니다.'
+  if (msg.includes('잠시 후 다시')) return '너무 빠르게 연속 등록했습니다. 30초 후 다시 시도해 주세요.'
+  if (msg.includes('원 댓글')) return '답글을 달 댓글이 삭제되었습니다.'
+  if (msg.includes('fetch')) return '네트워크 오류입니다. 다시 시도해 주세요.'
+  return `등록에 실패했습니다. (${msg || '알 수 없는 오류'})`
+}
+
+// 댓글 목록 → [{...댓글, replies: [...]}] (오래된 순)
+export function buildCommentTree(list) {
+  const byTime = [...list].sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+  const roots = []
+  const map = new Map()
+  byTime.forEach((c) => map.set(c.id, { ...c, replies: [] }))
+  byTime.forEach((c) => {
+    const node = map.get(c.id)
+    const parent = c.parent_id ? map.get(c.parent_id) : null
+    if (parent) parent.replies.push(node)
+    else roots.push(node)
+  })
+  return roots
+}

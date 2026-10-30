@@ -65,11 +65,13 @@ export async function getNewsById(id) {
 // 댓글 API (news_comments 테이블)
 // ──────────────────────────────────────────────────────────────
 
+export const COMMENT_FIELDS = 'id, post_id, user_id, parent_id, is_official, author_name, content, created_at'
+
 export async function getComments(postId) {
   if (!supabase) throw new Error('서버 미연결')
   const { data, error } = await supabase
     .from('news_comments')
-    .select('id, post_id, user_id, author_name, content, created_at')
+    .select(COMMENT_FIELDS)
     .eq('post_id', postId)
     .order('created_at', { ascending: true })
   if (error) throw error
@@ -77,12 +79,13 @@ export async function getComments(postId) {
 }
 
 // 로그인한 사용자만 가능. 작성자 이름과 user_id는 DB가 로그인 정보로 자동 기록
-export async function addComment(postId, authorName, content) {
+// parentId가 있으면 답글. 관리자가 쓰면 DB가 '광교우리동네교회' 공식 답글로 기록
+export async function addComment(postId, authorName, content, parentId = null) {
   if (!supabase) throw new Error('지금은 댓글을 남길 수 없습니다. (서버 미연결)')
   const { data, error } = await supabase
     .from('news_comments')
-    .insert([{ post_id: postId, author_name: authorName.trim() || '성도', content: content.trim() }])
-    .select('id, post_id, user_id, author_name, content, created_at')
+    .insert([{ post_id: postId, parent_id: parentId, author_name: authorName.trim() || '성도', content: content.trim() }])
+    .select(COMMENT_FIELDS)
     .single()
   if (error) throw error
   return data
