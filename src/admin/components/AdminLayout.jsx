@@ -19,6 +19,9 @@ export default function AdminLayout({ children }) {
           <Link to="/admin/posts/new" className="text-sm text-gray-300 hover:text-white transition-colors">
             + 새 글 작성
           </Link>
+          <Link to="/admin/comments" className="text-sm text-gray-300 hover:text-white transition-colors">
+            댓글 관리
+          </Link>
           <Link to="/" className="text-sm text-gray-300 hover:text-white transition-colors">
             ← 홈으로
           </Link>

@@ -16,6 +16,7 @@ import ProtectedAdmin from './admin/components/ProtectedAdmin'
 import AdminLogin from './admin/pages/AdminLogin'
 import AdminDashboard from './admin/pages/AdminDashboard'
 import PostEditor from './admin/pages/PostEditor'
+import AdminComments from './admin/pages/AdminComments'
 
 function MainLayout() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
           <Route index element={<AdminDashboard />} />
           <Route path="posts/new" element={<PostEditor />} />
           <Route path="posts/:id/edit" element={<PostEditor />} />
+          <Route path="comments" element={<AdminComments />} />
         </Route>
 
         {/* 메인 사이트 */}
