@@ -44,6 +44,73 @@ export async function getLatestNews(limit = 3) {
   }
 }
 
+export async function getNewsById(id) {
+  const fallback = () => NEWS.find((i) => String(i.id) === String(id) && i.published) ?? null
+  if (!supabase) return fallback()
+  try {
+    const { data, error } = await supabase
+      .from('news')
+      .select('*')
+      .eq('id', id)
+      .eq('is_published', true)
+      .maybeSingle()
+    if (error) throw error
+    return data ?? fallback()
+  } catch {
+    return fallback()
+  }
+}
+
+// ──────────────────────────────────────────────────────────────
+// 댓글 API (news_comments 테이블)
+// ──────────────────────────────────────────────────────────────
+
+export async function getComments(postId) {
+  if (!supabase) throw new Error('서버 미연결')
+  const { data, error } = await supabase
+    .from('news_comments')
+    .select('id, post_id, user_id, author_name, content, created_at')
+    .eq('post_id', postId)
+    .order('created_at', { ascending: true })
+  if (error) throw error
+  return data ?? []
+}
+
+// 로그인한 사용자만 가능. 작성자 이름과 user_id는 DB가 로그인 정보로 자동 기록
+export async function addComment(postId, authorName, content) {
+  if (!supabase) throw new Error('지금은 댓글을 남길 수 없습니다. (서버 미연결)')
+  const { data, error } = await supabase
+    .from('news_comments')
+    .insert([{ post_id: postId, author_name: authorName.trim() || '성도', content: content.trim() }])
+    .select('id, post_id, user_id, author_name, content, created_at')
+    .single()
+  if (error) throw error
+  return data
+}
+
+export async function deleteComment(commentId) {
+  const { error } = await supabase.from('news_comments').delete().eq('id', commentId)
+  if (error) throw error
+}
+
+// 여러 게시물의 댓글 수 { [postId]: count }
+export async function getCommentCounts(postIds) {
+  if (!supabase || !postIds?.length) return {}
+  try {
+    const { data, error } = await supabase
+      .from('news_comments')
+      .select('post_id')
+      .in('post_id', postIds)
+    if (error) throw error
+    return (data ?? []).reduce((acc, { post_id }) => {
+      acc[post_id] = (acc[post_id] ?? 0) + 1
+      return acc
+    }, {})
+  } catch {
+    return {}
+  }
+}
+
 // ──────────────────────────────────────────────────────────────
 // 관리자 API (/admin 전용)
 // ──────────────────────────────────────────────────────────────
@@ -81,5 +148,7 @@ export async function incrementView(postId) {
   if (!supabase) return
   try {
     await supabase.rpc('increment_view', { p_post_id: postId })
-  } catch {}
+  } catch {
+    // 조회수 실패는 무시
+  }
 }

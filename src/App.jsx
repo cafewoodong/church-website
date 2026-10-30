@@ -8,6 +8,7 @@ import About from './pages/About'
 import Worship from './pages/Worship'
 import Videos from './pages/Videos'
 import News from './pages/News'
+import NewsDetail from './pages/NewsDetail'
 import Location from './pages/Location'
 import Giving from './pages/Giving'
 
@@ -48,6 +49,7 @@ export default function App() {
           <Route path="/worship" element={<Worship />} />
           <Route path="/videos" element={<Videos />} />
           <Route path="/news" element={<News />} />
+          <Route path="/news/:id" element={<NewsDetail />} />
           <Route path="/location" element={<Location />} />
           <Route path="/giving" element={<Giving />} />
         </Route>

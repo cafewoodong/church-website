@@ -2,32 +2,24 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import PageHeader from '../components/PageHeader'
 import NewsCard from '../components/NewsCard'
-import { getAllNews } from '../services/newsService'
-import { supabase } from '../lib/supabase'
-
-const ADMIN_EMAIL = 'ggcommchurch@gmail.com'
+import { getAllNews, getCommentCounts } from '../services/newsService'
+import useIsAdmin from '../hooks/useIsAdmin'
 
 export default function News() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [commentCounts, setCommentCounts] = useState({})
+  const isAdmin = useIsAdmin()
 
   useEffect(() => {
     getAllNews()
-      .then(setItems)
+      .then((list) => {
+        setItems(list)
+        return getCommentCounts(list.map((i) => i.id))
+      })
+      .then((counts) => counts && setCommentCounts(counts))
       .catch(console.error)
       .finally(() => setLoading(false))
-  }, [])
-
-  useEffect(() => {
-    if (!supabase) return
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsAdmin(session?.user?.email === ADMIN_EMAIL)
-    })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      setIsAdmin(session?.user?.email === ADMIN_EMAIL)
-    })
-    return () => subscription.unsubscribe()
   }, [])
 
   return (
@@ -44,7 +36,7 @@ export default function News() {
             <p className="text-center py-16 text-gray-400 text-sm">등록된 게시글이 없습니다.</p>
           ) : (
             <div className="flex flex-col gap-6">
-              {items.map((item) => <NewsCard key={item.id} item={item} />)}
+              {items.map((item) => <NewsCard key={item.id} item={item} commentCount={commentCounts[item.id] ?? 0} />)}
             </div>
           )}
         </div>

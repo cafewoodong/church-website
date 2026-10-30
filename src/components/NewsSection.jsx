@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { getLatestNews, getAllNews } from '../services/newsService'
+import { getLatestNews, getAllNews, getCommentCounts } from '../services/newsService'
 import NewsCard from './NewsCard'
 
 function SkeletonCard() {
@@ -26,12 +26,17 @@ function SkeletonCard() {
 export default function NewsSection({ limit }) {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
+  const [commentCounts, setCommentCounts] = useState({})
 
   useEffect(() => {
     setLoading(true)
     const fetch = limit ? () => getLatestNews(limit) : getAllNews
     fetch()
-      .then(setItems)
+      .then((list) => {
+        setItems(list)
+        return getCommentCounts(list.map((i) => i.id))
+      })
+      .then((counts) => counts && setCommentCounts(counts))
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [limit])
@@ -50,7 +55,7 @@ export default function NewsSection({ limit }) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {loading
             ? Array.from({ length: skeletonCount }).map((_, i) => <SkeletonCard key={i} />)
-            : items.map((item) => <NewsCard key={item.id} item={item} />)
+            : items.map((item) => <NewsCard key={item.id} item={item} commentCount={commentCounts[item.id] ?? 0} />)
           }
         </div>
 

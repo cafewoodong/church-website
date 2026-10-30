@@ -11,7 +11,14 @@ function createSupabaseClient() {
     return null
   }
   try {
-    return createClient(supabaseUrl, supabaseAnonKey)
+    return createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        flowType: 'pkce',          // 카카오/구글 로그인 후 ?code= 로 안전하게 세션 교환
+        detectSessionInUrl: true,
+        persistSession: true,
+        autoRefreshToken: true,
+      },
+    })
   } catch (e) {
     console.error('[Supabase] 초기화 실패:', e.message)
     return null
