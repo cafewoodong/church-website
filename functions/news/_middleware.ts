@@ -42,19 +42,40 @@ function firstImage(raw: string | null): string | null {
   return first && /^https?:\/\//.test(first) ? first : null
 }
 
-async function fetchPost(env: Env, id: string): Promise<NewsRow | null> {
-  const base = env.SUPABASE_URL || env.VITE_SUPABASE_URL
-  const key = env.SUPABASE_ANON_KEY || env.VITE_SUPABASE_ANON_KEY
-  if (!base || !key) return null
+/**
+ * 접속 정보 후보를 순서대로 돌려준다.
+ *
+ * VITE_ 쪽을 먼저 쓴다. 브라우저 번들에 박혀서 실제로 동작하는 것이
+ * 확인된 값이기 때문이다. SUPABASE_URL 은 예전에 설정해 둔 값이 남아
+ * 있을 수 있어(실제로 /api/news 가 이 값으로 실패한다) 뒤로 미룬다.
+ */
+function credentials(env: Env): Array<{ base: string; key: string }> {
+  const keys = [env.VITE_SUPABASE_ANON_KEY, env.SUPABASE_ANON_KEY].filter(Boolean) as string[]
+  const bases = [env.VITE_SUPABASE_URL, env.SUPABASE_URL].filter(Boolean) as string[]
+  const out: Array<{ base: string; key: string }> = []
+  for (const base of bases) {
+    for (const key of keys) out.push({ base, key })
+  }
+  return out
+}
 
-  const url = `${base}/rest/v1/news?id=eq.${encodeURIComponent(id)}&is_published=eq.true&select=title,summary,image_url&limit=1`
-  const res = await fetch(url, {
-    headers: { apikey: key, authorization: `Bearer ${key}` },
-    cf: { cacheTtl: 300, cacheEverything: true },
-  })
-  if (!res.ok) return null
-  const rows = (await res.json()) as NewsRow[]
-  return rows?.[0] ?? null
+async function fetchPost(env: Env, id: string): Promise<NewsRow | null> {
+  const query = `/rest/v1/news?id=eq.${encodeURIComponent(id)}&is_published=eq.true&select=title,summary,image_url&limit=1`
+
+  for (const { base, key } of credentials(env)) {
+    try {
+      const res = await fetch(base + query, {
+        headers: { apikey: key, authorization: `Bearer ${key}` },
+        cf: { cacheTtl: 300, cacheEverything: true },
+      })
+      if (!res.ok) continue // 주소나 키가 틀렸다 → 다음 후보로
+      const rows = (await res.json()) as NewsRow[]
+      return rows?.[0] ?? null
+    } catch {
+      // 주소를 찾을 수 없는 경우 등 → 다음 후보로
+    }
+  }
+  return null
 }
 
 class AttrSetter {
