@@ -60,7 +60,7 @@ export default function NewsDetail() {
   }, [loading, location.hash])
 
   if (loading) {
-    return <p className="text-center py-24 text-gray-400 text-sm">게시물을 불러오는 중...</p>
+    return <p className="text-center py-24 text-church-muted text-sm">게시물을 불러오는 중...</p>
   }
 
   if (!post) {
@@ -91,7 +91,7 @@ export default function NewsDetail() {
           </Link>
           {isAdmin && (
             <Link to={`/admin/posts/${post.id}/edit`}
-              className="text-xs px-3 py-1.5 rounded-lg border border-church-green text-church-green hover:bg-church-green hover:text-white transition-colors">
+              className="text-sm px-3 py-1.5 rounded-lg border border-church-green text-church-green hover:bg-church-green hover:text-white transition-colors">
               글 수정
             </Link>
           )}
@@ -106,9 +106,9 @@ export default function NewsDetail() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-church-text leading-none">{CHURCH_NAME}</p>
-              <p className="text-xs text-gray-400 mt-1">{category} · {formatDate(created_at)}</p>
+              <p className="text-sm text-church-muted mt-1">{category} · {formatDate(created_at)}</p>
             </div>
-            <div className="flex items-center gap-1 text-xs text-gray-400 shrink-0">
+            <div className="flex items-center gap-1 text-sm text-church-muted shrink-0">
               <IconEye />
               <span>{viewCount}</span>
             </div>
@@ -121,7 +121,7 @@ export default function NewsDetail() {
 
           {/* 본문 */}
           <div className="px-5 pt-5 pb-4">
-            <span className="inline-block text-[11px] font-semibold text-church-green bg-church-bg px-2.5 py-1 rounded-full mb-3">
+            <span className="inline-block text-sm font-semibold text-church-green bg-church-bg px-2.5 py-1 rounded-full mb-3">
               {category}
             </span>
             <h1 className="text-xl md:text-2xl font-bold text-church-text leading-snug break-keep mb-3">{title}</h1>
@@ -136,7 +136,7 @@ export default function NewsDetail() {
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-4">
                 {tags.map((tag) => (
-                  <span key={tag} className="text-xs text-church-green font-medium">{tag}</span>
+                  <span key={tag} className="text-sm text-church-green font-medium">{tag}</span>
                 ))}
               </div>
             )}
@@ -147,11 +147,11 @@ export default function NewsDetail() {
             <ReactionBar postId={post.id} initial={reactions} size="lg" />
             <div className="ml-auto flex items-center gap-1">
               <a href="https://open.kakao.com/o/sHFd1kxi" target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs text-gray-500 hover:bg-church-bg hover:text-church-green transition-colors">
+                className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm text-gray-500 hover:bg-church-bg hover:text-church-green transition-colors">
                 <span>📨</span><span>문의</span>
               </a>
               <button type="button" onClick={() => sharePost({ id: post.id, title, summary })}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs text-gray-500 hover:bg-church-bg hover:text-church-green transition-colors">
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-gray-500 hover:bg-church-bg hover:text-church-green transition-colors">
                 <IconShare /><span>공유</span>
               </button>
             </div>

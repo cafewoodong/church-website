@@ -9,7 +9,7 @@ function VideoCard({ label, playlistId }) {
       {isPlaceholder ? (
         <div className="aspect-video flex flex-col items-center justify-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 text-center px-6 gap-2">
           <span className="text-3xl opacity-30">📽️</span>
-          <p className="text-gray-400 text-xs leading-relaxed">
+          <p className="text-church-muted text-sm leading-relaxed">
             YouTube 재생목록 ID를<br />
             <code className="font-mono bg-gray-100 px-1 rounded">constants.js</code>에 입력해주세요
           </p>
@@ -34,10 +34,10 @@ export default function VideoSection({ full = false }) {
     <section className={`${full ? 'py-20' : 'py-16'} bg-white px-4`}>
       <div className={`${full ? 'max-w-6xl' : 'max-w-5xl'} mx-auto`}>
         <div className="text-center mb-10">
-          <p className="text-church-green text-xs font-semibold tracking-widest uppercase mb-3">Sermon</p>
+          <p className="text-church-green text-sm font-semibold tracking-widest uppercase mb-3">Sermon</p>
           <h2 className="text-2xl md:text-3xl font-bold text-church-text mb-3">예배 영상</h2>
           <div className="w-12 h-0.5 bg-church-green mx-auto mb-3 rounded"></div>
-          <p className="text-gray-400 text-sm">광교우리동네교회의 예배와 말씀을 영상으로 함께하실 수 있습니다.</p>
+          <p className="text-church-muted text-sm">광교우리동네교회의 예배와 말씀을 영상으로 함께하실 수 있습니다.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

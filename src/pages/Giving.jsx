@@ -31,15 +31,15 @@ export default function Giving() {
             </h2>
             <div className="divide-y divide-gray-100 text-sm mb-5">
               <div className="flex justify-between py-3">
-                <span className="text-gray-400 font-medium">은행</span>
+                <span className="text-church-muted font-medium">은행</span>
                 <span className="text-church-text font-semibold">{BANK_NAME}</span>
               </div>
               <div className="flex justify-between py-3 items-center">
-                <span className="text-gray-400 font-medium">계좌번호</span>
+                <span className="text-church-muted font-medium">계좌번호</span>
                 <span className="text-church-text font-semibold font-mono tracking-wide">{BANK_ACCOUNT}</span>
               </div>
               <div className="flex justify-between py-3 items-start gap-4">
-                <span className="text-gray-400 font-medium shrink-0">예금주</span>
+                <span className="text-church-muted font-medium shrink-0">예금주</span>
                 <span className="text-church-text font-semibold text-right break-keep leading-snug">{BANK_HOLDER}</span>
               </div>
             </div>
@@ -70,8 +70,8 @@ export default function Giving() {
                 '박기도 선교헌금',
               ].map((ex) => (
                 <li key={ex} className="text-sm text-gray-500 flex items-center gap-2">
-                  <span className="text-church-green text-xs">예)</span>
-                  <span className="font-mono bg-white border border-gray-100 rounded-lg px-3 py-1 text-xs text-church-text">
+                  <span className="text-church-green text-sm">예)</span>
+                  <span className="font-mono bg-white border border-gray-100 rounded-lg px-3 py-1 text-sm text-church-text">
                     {ex}
                   </span>
                 </li>
@@ -102,12 +102,12 @@ export default function Giving() {
 
           {/* 카카오페이 준비중 */}
           <div className="rounded-2xl border border-dashed border-gray-200 p-6 text-center">
-            <p className="text-xs text-gray-400 mb-4 leading-relaxed break-keep">
+            <p className="text-sm text-church-muted mb-4 leading-relaxed break-keep">
               카카오페이 헌금은 추후 교회 계좌와 정산 방식이 확인된 후 제공될 예정입니다.
             </p>
             <button
               disabled
-              className="px-6 py-2.5 rounded-xl text-sm font-medium bg-gray-100 text-gray-400 cursor-not-allowed"
+              className="px-6 py-2.5 rounded-xl text-sm font-medium bg-gray-100 text-church-muted cursor-not-allowed"
             >
               카카오페이 헌금 준비중
             </button>

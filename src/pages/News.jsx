@@ -34,9 +34,9 @@ export default function News() {
       <section className="py-12 bg-church-bg px-4">
         <div className="max-w-[720px] mx-auto">
           {loading ? (
-            <p className="text-center py-16 text-gray-400 text-sm">소식을 불러오는 중...</p>
+            <p className="text-center py-16 text-church-muted text-sm">소식을 불러오는 중...</p>
           ) : items.length === 0 ? (
-            <p className="text-center py-16 text-gray-400 text-sm">등록된 게시글이 없습니다.</p>
+            <p className="text-center py-16 text-church-muted text-sm">등록된 게시글이 없습니다.</p>
           ) : (
             <div className="flex flex-col gap-6">
               {items.map((item) => <NewsCard key={item.id} item={item} commentCount={commentCounts[item.id] ?? 0} />)}

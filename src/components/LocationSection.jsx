@@ -8,7 +8,7 @@ export default function LocationSection() {
     <section className="py-16 bg-church-bg px-4">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-10">
-          <p className="text-church-green text-xs font-semibold tracking-widest uppercase mb-3">Location</p>
+          <p className="text-church-green text-sm font-semibold tracking-widest uppercase mb-3">Location</p>
           <h2 className="text-2xl md:text-3xl font-bold text-church-text mb-3">찾아오시는 길</h2>
           <div className="w-12 h-0.5 bg-church-green mx-auto rounded"></div>
         </div>
@@ -35,15 +35,15 @@ export default function LocationSection() {
                 <li className="flex gap-3">
                   <span className="mt-0.5 text-base">📍</span>
                   <div>
-                    <p className="text-xs text-gray-400 font-medium mb-0.5">주소</p>
+                    <p className="text-sm text-church-muted font-medium mb-0.5">주소</p>
                     <p className="text-gray-700 text-sm break-keep">{CHURCH_ADDRESS}</p>
-                    <p className="text-gray-300 text-xs">(우) {CHURCH_ZIPCODE}</p>
+                    <p className="text-church-muted text-sm">(우) {CHURCH_ZIPCODE}</p>
                   </div>
                 </li>
                 <li className="flex gap-3">
                   <span className="mt-0.5 text-base">📞</span>
                   <div>
-                    <p className="text-xs text-gray-400 font-medium mb-0.5">전화</p>
+                    <p className="text-sm text-church-muted font-medium mb-0.5">전화</p>
                     <a href={`tel:${CHURCH_PHONE}`} className="text-gray-700 text-sm hover:text-church-green transition-colors">
                       {CHURCH_PHONE}
                     </a>
@@ -52,7 +52,7 @@ export default function LocationSection() {
                 <li className="flex gap-3">
                   <span className="mt-0.5 text-base">✉️</span>
                   <div>
-                    <p className="text-xs text-gray-400 font-medium mb-0.5">이메일</p>
+                    <p className="text-sm text-church-muted font-medium mb-0.5">이메일</p>
                     <a href={`mailto:${CHURCH_EMAIL}`} className="text-gray-700 text-sm hover:text-church-green transition-colors">
                       {CHURCH_EMAIL}
                     </a>

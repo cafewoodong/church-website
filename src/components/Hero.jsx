@@ -22,7 +22,7 @@ export default function Hero() {
       ></div>
 
       <div className="relative max-w-4xl mx-auto w-full">
-        <p className="text-church-green text-xs font-semibold tracking-[0.25em] uppercase mb-5">
+        <p className="text-church-green text-sm font-semibold tracking-[0.25em] uppercase mb-5">
           Gwanggyo Community Church
         </p>
         <h1 className="text-4xl md:text-5xl font-bold text-church-text mb-3 break-keep leading-snug">
@@ -37,13 +37,13 @@ export default function Hero() {
         <div className="flex flex-wrap gap-3">
           <Link
             to="/videos"
-            className="px-6 py-2.5 bg-church-green hover:bg-church-green-dark text-white rounded-lg font-medium text-sm transition-colors shadow-sm"
+            className="px-6 min-h-11 bg-church-green hover:bg-church-green-dark text-white rounded-lg font-medium text-sm transition-colors shadow-sm inline-flex items-center justify-center"
           >
             온라인 예배 참여
           </Link>
           <Link
             to="/location"
-            className="px-6 py-2.5 border border-church-green text-church-green hover:bg-church-green hover:text-white rounded-lg font-medium text-sm transition-colors"
+            className="px-6 min-h-11 border border-church-green text-church-green hover:bg-church-green hover:text-white rounded-lg font-medium text-sm transition-colors inline-flex items-center justify-center"
           >
             찾아오시는 길
           </Link>

@@ -39,8 +39,8 @@ export default function Header() {
                 className={({ isActive }) =>
                   `ml-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
                     isActive
-                      ? 'bg-church-gold text-white'
-                      : 'bg-church-gold text-white hover:opacity-90'
+                      ? 'bg-church-gold text-church-text'
+                      : 'bg-church-gold text-church-text hover:opacity-90'
                   }`
                 }
               >
@@ -66,7 +66,7 @@ export default function Header() {
 
         {/* 모바일 햄버거 */}
         <button
-          className="md:hidden flex flex-col justify-center gap-1.5 p-2"
+          className="md:hidden flex flex-col justify-center items-center gap-1.5 min-w-11 min-h-11 -mr-2"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="메뉴 열기"
         >

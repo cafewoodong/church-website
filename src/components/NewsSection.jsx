@@ -47,7 +47,7 @@ export default function NewsSection({ limit }) {
     <section className="py-16 bg-church-bg px-4">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-10">
-          <p className="text-church-green text-xs font-semibold tracking-widest uppercase mb-3">News</p>
+          <p className="text-church-green text-sm font-semibold tracking-widest uppercase mb-3">News</p>
           <h2 className="text-2xl md:text-3xl font-bold text-church-text mb-3">교회 소식</h2>
           <div className="w-12 h-0.5 bg-church-green mx-auto rounded"></div>
         </div>

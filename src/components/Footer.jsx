@@ -13,8 +13,8 @@ export default function Footer() {
           {/* 교회 정보 */}
           <div>
             <h3 className="text-white font-bold text-base mb-1">{CHURCH_NAME}</h3>
-            <p className="text-gray-400 text-xs mb-5 break-keep leading-relaxed">{CHURCH_TAGLINE}</p>
-            <ul className="space-y-1.5 text-xs text-gray-400">
+            <p className="text-gray-300 text-sm mb-5 break-keep leading-relaxed">{CHURCH_TAGLINE}</p>
+            <ul className="space-y-1.5 text-sm text-gray-300">
               <li className="break-keep">📍 {CHURCH_ADDRESS}</li>
               <li>
                 📞{' '}
@@ -42,12 +42,12 @@ export default function Footer() {
                       href={item.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-gray-400 hover:text-church-green transition-colors"
+                      className="text-sm text-gray-300 hover:text-church-green transition-colors"
                     >
                       {item.label}
                     </a>
                   ) : (
-                    <Link to={item.to} className="text-xs text-gray-400 hover:text-church-green transition-colors">
+                    <Link to={item.to} className="text-sm text-gray-300 hover:text-church-green transition-colors">
                       {item.label}
                     </Link>
                   )}
@@ -59,25 +59,25 @@ export default function Footer() {
           {/* 온라인 헌금 */}
           <div>
             <h3 className="text-white text-sm font-semibold mb-4">온라인 헌금</h3>
-            <ul className="space-y-1.5 text-xs text-gray-400 mb-5">
+            <ul className="space-y-1.5 text-sm text-gray-300 mb-5">
               <li>은행: {BANK_NAME}</li>
               <li>계좌: {BANK_ACCOUNT}</li>
               <li className="break-keep">예금주: {BANK_HOLDER}</li>
             </ul>
             <Link
               to="/giving"
-              className="inline-block px-4 py-2 border border-church-gold text-church-gold hover:bg-church-gold hover:text-white rounded-lg text-xs font-medium transition-colors"
+              className="inline-block px-4 py-2 border border-church-gold text-church-gold hover:bg-church-gold hover:text-church-text rounded-lg text-sm font-medium transition-colors"
             >
               헌금 안내 보기
             </Link>
           </div>
         </div>
 
-        <div className="border-t border-white/10 pt-6 flex items-center justify-center gap-4 text-xs text-gray-500">
+        <div className="border-t border-white/10 pt-6 flex items-center justify-center gap-4 text-sm text-gray-300">
           <span>© {new Date().getFullYear()} {CHURCH_NAME}. All rights reserved.</span>
           <Link
             to="/admin/login"
-            className="text-gray-600 hover:text-gray-400 transition-colors"
+            className="text-gray-300 hover:text-gray-200 transition-colors"
           >
             관리자
           </Link>

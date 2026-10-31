@@ -32,22 +32,22 @@ export default function Location() {
               <div className="flex gap-3">
                 <span>📍</span>
                 <div>
-                  <p className="text-xs text-gray-400 mb-0.5">주소</p>
+                  <p className="text-sm text-church-muted mb-0.5">주소</p>
                   <p className="text-sm text-gray-700 break-keep">{CHURCH_ADDRESS}</p>
-                  <p className="text-xs text-gray-300">(우) {CHURCH_ZIPCODE}</p>
+                  <p className="text-sm text-church-muted">(우) {CHURCH_ZIPCODE}</p>
                 </div>
               </div>
               <div className="flex gap-3">
                 <span>📞</span>
                 <div>
-                  <p className="text-xs text-gray-400 mb-0.5">전화</p>
+                  <p className="text-sm text-church-muted mb-0.5">전화</p>
                   <a href={`tel:${CHURCH_PHONE}`} className="text-sm text-gray-700 hover:text-church-green transition-colors">{CHURCH_PHONE}</a>
                 </div>
               </div>
               <div className="flex gap-3">
                 <span>✉️</span>
                 <div>
-                  <p className="text-xs text-gray-400 mb-0.5">이메일</p>
+                  <p className="text-sm text-church-muted mb-0.5">이메일</p>
                   <a href={`mailto:${CHURCH_EMAIL}`} className="text-sm text-gray-700 hover:text-church-green transition-colors">{CHURCH_EMAIL}</a>
                 </div>
               </div>
@@ -58,21 +58,21 @@ export default function Location() {
               <div className="flex gap-3">
                 <span>🚇</span>
                 <div>
-                  <p className="text-xs text-gray-400 mb-0.5">지하철</p>
+                  <p className="text-sm text-church-muted mb-0.5">지하철</p>
                   <p className="text-sm text-gray-700 break-keep">상현역 3번출구에서 직선 600m 앞 32단지 정문 상가 2층</p>
                 </div>
               </div>
               <div className="flex gap-3">
                 <span>🚌</span>
                 <div>
-                  <p className="text-xs text-gray-400 mb-0.5">버스</p>
+                  <p className="text-sm text-church-muted mb-0.5">버스</p>
                   <p className="text-sm text-gray-700 break-keep">32단지 아파트 정문정거장</p>
                 </div>
               </div>
               <div className="flex gap-3">
                 <span>🚗</span>
                 <div>
-                  <p className="text-xs text-gray-400 mb-0.5">자가용</p>
+                  <p className="text-sm text-church-muted mb-0.5">자가용</p>
                   <p className="text-sm text-gray-700 break-keep">상가주차장 이용(사전에 전화필요)</p>
                 </div>
               </div>

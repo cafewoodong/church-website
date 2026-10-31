@@ -84,7 +84,7 @@ export default function About() {
                   ) : (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-6 text-center">
                       <span className="text-7xl opacity-20">👤</span>
-                      <p className="text-xs leading-relaxed text-gray-400">
+                      <p className="text-sm leading-relaxed text-church-muted">
                         담임목사 사진을<br />
                         <code className="font-mono bg-gray-100 px-1.5 py-0.5 rounded">
                           public/pastor.jpg
@@ -98,10 +98,10 @@ export default function About() {
                 <p className="text-center font-bold text-church-text">담임목사 김순종</p>
 
                 <div className="bg-church-bg rounded-2xl border border-gray-100 px-5 py-4">
-                  <p className="text-[11px] font-semibold text-gray-400 tracking-widest uppercase mb-3">약력</p>
+                  <p className="text-sm font-semibold text-church-muted tracking-widest uppercase mb-3">약력</p>
                   <ul className="space-y-2">
                     {CAREER.map((item) => (
-                      <li key={item} className="flex gap-2 items-baseline text-xs text-gray-600 leading-relaxed">
+                      <li key={item} className="flex gap-2 items-baseline text-sm text-gray-600 leading-relaxed">
                         <span className="text-church-green shrink-0">•</span>
                         <span className="break-keep">{item}</span>
                       </li>

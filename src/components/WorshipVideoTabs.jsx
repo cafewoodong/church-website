@@ -47,7 +47,7 @@ export default function WorshipVideoTabs() {
                   href={`https://www.youtube.com/playlist?list=${tab.playlistId}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-church-green hover:underline underline-offset-2"
+                  className="text-sm text-church-green hover:underline underline-offset-2"
                 >
                   유튜브에서 직접 보기 →
                 </a>
@@ -56,8 +56,8 @@ export default function WorshipVideoTabs() {
           ) : (
             <div className="aspect-video rounded-xl bg-gray-50 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-2 text-center px-6">
               <span className="text-3xl opacity-25">📺</span>
-              <p className="text-sm text-gray-400">재생목록 ID를 입력해주세요</p>
-              <p className="text-xs text-gray-300">
+              <p className="text-sm text-church-muted">재생목록 ID를 입력해주세요</p>
+              <p className="text-sm text-church-muted">
                 <code className="font-mono bg-gray-100 px-1 rounded">constants.js</code>의 WORSHIP_VIDEO_TABS에서 수정할 수 있습니다
               </p>
             </div>

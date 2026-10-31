@@ -37,16 +37,18 @@ export default function ImageCarousel({ images, title, category, fit = 'cover', 
       {many && (
         <>
           <button type="button" aria-label="이전 사진" onClick={(e) => go(e, idx - 1)}
-            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/40 text-white rounded-full flex items-center justify-center hover:bg-black/60">‹</button>
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-11 h-11 bg-black/60 text-white rounded-full flex items-center justify-center hover:bg-black/60">‹</button>
           <button type="button" aria-label="다음 사진" onClick={(e) => go(e, idx + 1)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/40 text-white rounded-full flex items-center justify-center hover:bg-black/60">›</button>
-          <div className="absolute bottom-3 inset-x-0 flex justify-center gap-1">
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 bg-black/60 text-white rounded-full flex items-center justify-center hover:bg-black/60">›</button>
+          <div className="absolute bottom-3 inset-x-0 flex justify-center gap-0">
             {images.map((_, i) => (
               <button key={i} type="button" aria-label={`${i + 1}번째 사진`} onClick={(e) => go(e, i)}
-                className={`w-1.5 h-1.5 rounded-full transition-colors ${i === idx ? 'bg-white' : 'bg-white/50'}`} />
+                className="w-6 h-6 flex items-center justify-center">
+                <span className={`block w-1.5 h-1.5 rounded-full transition-colors ${i === idx ? 'bg-white' : 'bg-white/50'}`} />
+              </button>
             ))}
           </div>
-          <span className="absolute top-3 right-3 text-[11px] text-white bg-black/40 px-2 py-0.5 rounded-full">
+          <span className="absolute top-3 right-3 text-sm text-white bg-black/65 px-2 py-0.5 rounded-full">
             {idx + 1} / {images.length}
           </span>
         </>
@@ -54,7 +56,7 @@ export default function ImageCarousel({ images, title, category, fit = 'cover', 
 
       {showBadge && category && (
         <div className="absolute bottom-3 left-3">
-          <span className="text-[11px] font-semibold bg-white/80 backdrop-blur-sm text-church-green px-2.5 py-1 rounded-full border border-white/60">
+          <span className="text-sm font-semibold bg-white/80 backdrop-blur-sm text-church-green px-2.5 py-1 rounded-full border border-white/60">
             {category}
           </span>
         </div>

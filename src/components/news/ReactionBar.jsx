@@ -45,7 +45,7 @@ export default function ReactionBar({ postId, initial, size = 'sm' }) {
     await toggleReaction(postId, type, !already)
   }
 
-  const pad = size === 'lg' ? 'px-3.5 py-2 text-sm' : 'px-2.5 py-1.5 text-xs'
+  const pad = size === 'lg' ? 'px-3.5 min-h-11 text-sm' : 'px-2.5 min-h-11 text-sm'
 
   return (
     <div className="flex flex-wrap gap-1.5">
@@ -65,7 +65,7 @@ export default function ReactionBar({ postId, initial, size = 'sm' }) {
           >
             <span>{emoji}</span>
             <span>{type}</span>
-            {count > 0 && <span className={active ? 'text-white/80' : 'text-gray-400'}>{count}</span>}
+            {count > 0 && <span className={active ? 'text-white/80' : 'text-church-muted'}>{count}</span>}
           </button>
         )
       })}

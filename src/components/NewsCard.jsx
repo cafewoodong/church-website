@@ -24,9 +24,9 @@ export default function NewsCard({ item, commentCount = 0 }) {
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold text-church-text leading-none">{CHURCH_NAME}</p>
-          <p className="text-xs text-gray-400 mt-0.5">{category} · {formatDate(created_at)}</p>
+          <p className="text-sm text-church-muted mt-0.5">{category} · {formatDate(created_at)}</p>
         </div>
-        <div className="flex items-center gap-1 text-xs text-gray-300 shrink-0">
+        <div className="flex items-center gap-1 text-sm text-church-muted shrink-0">
           <IconEye />
           <span>{view_count ?? 0}</span>
         </div>
@@ -45,14 +45,14 @@ export default function NewsCard({ item, commentCount = 0 }) {
         <h3 className="font-bold text-church-text text-sm leading-snug mb-1.5 break-keep group-hover:text-church-green transition-colors">
           {title}
         </h3>
-        <p className="text-xs text-gray-500 leading-relaxed break-keep line-clamp-2 mb-1">
+        <p className="text-sm text-gray-500 leading-relaxed break-keep line-clamp-2 mb-1">
           {summary}
         </p>
-        <span className="text-xs text-gray-400 group-hover:text-church-green">더 보기</span>
+        <span className="text-sm text-church-muted group-hover:text-church-green">더 보기</span>
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-2">
             {tags.map((tag) => (
-              <span key={tag} className="text-[11px] text-church-green font-medium">{tag}</span>
+              <span key={tag} className="text-sm text-church-green font-medium">{tag}</span>
             ))}
           </div>
         )}
@@ -67,7 +67,7 @@ export default function NewsCard({ item, commentCount = 0 }) {
       <div className="flex items-center gap-1 px-3 py-2.5 border-t border-gray-100 mt-1">
         <Link
           to={`${detailPath}#comments`}
-          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs text-gray-500 hover:bg-church-bg hover:text-church-green transition-colors"
+          className="flex items-center gap-1 px-2.5 min-h-11 rounded-lg text-sm text-gray-500 hover:bg-church-bg hover:text-church-green transition-colors"
         >
           <span>💬</span>
           <span>댓글{commentCount > 0 ? ` ${commentCount}` : ' 달기'}</span>
@@ -76,7 +76,7 @@ export default function NewsCard({ item, commentCount = 0 }) {
           href="https://open.kakao.com/o/sHFd1kxi"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs text-gray-500 hover:bg-church-bg hover:text-church-green transition-colors"
+          className="flex items-center gap-1 px-2.5 min-h-11 rounded-lg text-sm text-gray-500 hover:bg-church-bg hover:text-church-green transition-colors"
         >
           <span>📨</span>
           <span>문의</span>
@@ -84,7 +84,7 @@ export default function NewsCard({ item, commentCount = 0 }) {
         <button
           type="button"
           onClick={() => sharePost({ id, title, summary })}
-          className="flex items-center gap-1.5 ml-auto px-2.5 py-1.5 rounded-lg text-xs text-gray-500 hover:bg-church-bg hover:text-church-green transition-colors"
+          className="flex items-center gap-1.5 ml-auto px-2.5 min-h-11 rounded-lg text-sm text-gray-500 hover:bg-church-bg hover:text-church-green transition-colors"
         >
           <IconShare />
           <span>공유</span>

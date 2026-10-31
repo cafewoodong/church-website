@@ -25,7 +25,7 @@ export default function Worship() {
                     <h3 className="font-bold text-church-text text-lg">{s.name}</h3>
                   </div>
                   <p className="text-3xl font-bold text-church-green mb-1">{s.time}</p>
-                  <p className="text-sm text-gray-400 mb-3">{s.day}</p>
+                  <p className="text-sm text-church-muted mb-3">{s.day}</p>
                   <p className="text-sm text-gray-500 break-keep leading-relaxed">{s.desc}</p>
                 </div>
               ))}

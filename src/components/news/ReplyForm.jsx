@@ -48,19 +48,19 @@ export default function ReplyForm({
         className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-church-green"
       />
       <div className="flex items-center gap-2">
-        <span className="text-[11px] text-gray-400">{content.length}/{MAX_LEN}</span>
-        {error && <span className="text-[11px] text-red-500">{error}</span>}
+        <span className="text-sm text-church-muted">{content.length}/{MAX_LEN}</span>
+        {error && <span className="text-sm text-red-500">{error}</span>}
         <div className="ml-auto flex items-center gap-1.5">
           {onCancel && (
             <button type="button" onClick={onCancel}
-              className="px-3 py-1.5 text-xs text-gray-500 hover:text-church-text rounded-lg">
+              className="px-3 py-1.5 text-sm text-gray-500 hover:text-church-text rounded-lg">
               취소
             </button>
           )}
           <button
             type="submit"
             disabled={sending}
-            className={`bg-church-green hover:bg-church-green-dark disabled:opacity-50 text-white rounded-lg font-medium transition-colors ${compact ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm'}`}
+            className={`bg-church-green hover:bg-church-green-dark disabled:opacity-50 text-white rounded-lg font-medium transition-colors ${compact ? 'px-3 py-1.5 text-sm' : 'px-4 py-2 text-sm'}`}
           >
             {sending ? '등록 중...' : submitLabel}
           </button>

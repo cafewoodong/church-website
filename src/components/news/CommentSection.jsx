@@ -49,7 +49,7 @@ function LoginPrompt() {
           <GoogleIcon /> 구글로 로그인
         </button>
       </div>
-      {error && <p className="text-[11px] text-red-500 mt-2">{error}</p>}
+      {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
     </div>
   )
 }
@@ -57,7 +57,7 @@ function LoginPrompt() {
 function CommentItem({ c, isReply, canReply, canDelete, onReply, onDelete }) {
   return (
     <div className={`flex gap-3 ${isReply ? 'pt-3' : ''}`}>
-      <div className={`${isReply ? 'w-7 h-7' : 'w-8 h-8'} rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
+      <div className={`${isReply ? 'w-7 h-7' : 'w-8 h-8'} rounded-full flex items-center justify-center text-sm font-semibold shrink-0 ${
         c.is_official ? 'bg-church-green text-white' : 'bg-church-bg border border-gray-100 text-church-green'
       }`}>
         {c.is_official ? '✝' : c.author_name?.slice(0, 1)}
@@ -68,15 +68,15 @@ function CommentItem({ c, isReply, canReply, canDelete, onReply, onDelete }) {
           {c.is_official && (
             <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-church-green/10 text-church-green">교회</span>
           )}
-          <span className="text-[11px] text-gray-400">{formatDateTime(c.created_at)}</span>
+          <span className="text-sm text-church-muted">{formatDateTime(c.created_at)}</span>
         </div>
         <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap break-keep mt-0.5">{c.content}</p>
         <div className="flex items-center gap-3 mt-1">
           {canReply && (
-            <button type="button" onClick={onReply} className="text-[11px] text-gray-400 hover:text-church-green">답글</button>
+            <button type="button" onClick={onReply} className="text-sm text-church-muted hover:text-church-green">답글</button>
           )}
           {canDelete && (
-            <button type="button" onClick={onDelete} className="text-[11px] text-gray-400 hover:text-red-500">삭제</button>
+            <button type="button" onClick={onDelete} className="text-sm text-church-muted hover:text-red-500">삭제</button>
           )}
         </div>
       </div>
@@ -126,11 +126,11 @@ export default function CommentSection({ postId, isAdmin }) {
       </h2>
 
       {loading ? (
-        <p className="text-xs text-gray-400 py-4">댓글을 불러오는 중...</p>
+        <p className="text-sm text-church-muted py-4">댓글을 불러오는 중...</p>
       ) : unavailable ? (
-        <p className="text-xs text-gray-400 py-4">댓글을 불러올 수 없습니다. (서버 연결 또는 댓글 테이블 확인 필요)</p>
+        <p className="text-sm text-church-muted py-4">댓글을 불러올 수 없습니다. (서버 연결 또는 댓글 테이블 확인 필요)</p>
       ) : tree.length === 0 ? (
-        <p className="text-xs text-gray-400 py-4">첫 댓글을 남겨 주세요. 🙏</p>
+        <p className="text-sm text-church-muted py-4">첫 댓글을 남겨 주세요. 🙏</p>
       ) : (
         <ul className="divide-y divide-gray-100 mb-4">
           {tree.map((c) => (
@@ -180,9 +180,9 @@ export default function CommentSection({ postId, isAdmin }) {
 
       {!unavailable && user && (
         <div className="bg-church-bg rounded-xl p-3 space-y-2">
-          <div className="flex items-center gap-2 text-xs text-gray-500">
+          <div className="flex items-center gap-2 text-sm text-gray-500">
             <span><b className="text-church-text">{isAdmin ? '광교우리동네교회' : myName}</b> 님으로 작성</span>
-            <button type="button" onClick={signOut} className="ml-auto text-gray-400 hover:text-church-green underline underline-offset-2">
+            <button type="button" onClick={signOut} className="ml-auto text-church-muted hover:text-church-green underline underline-offset-2">
               로그아웃
             </button>
           </div>

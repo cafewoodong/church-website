@@ -6,7 +6,7 @@ export default function PageHeader({ title, subtitle }) {
           <div className="w-1 h-6 bg-church-green rounded-full"></div>
           <h1 className="text-2xl md:text-3xl font-bold text-church-text">{title}</h1>
         </div>
-        {subtitle && <p className="text-gray-400 text-sm ml-4">{subtitle}</p>}
+        {subtitle && <p className="text-church-muted text-sm ml-4">{subtitle}</p>}
       </div>
     </div>
   )
