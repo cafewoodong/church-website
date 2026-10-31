@@ -35,11 +35,20 @@ function tidy(text: string): string {
   return t.length > 160 ? `${t.slice(0, 157).trimEnd()}…` : t
 }
 
-/** image_url 은 한 장일 수도, 여러 장이 줄바꿈/콤마로 이어진 문자열일 수도 있다 */
+/**
+ * image_url 은 한 장이면 URL 문자열, 여러 장이면 JSON 배열 문자열이다.
+ * (src/components/news/newsUtils.js 의 parseImageUrls 와 같은 규칙)
+ */
 function firstImage(raw: string | null): string | null {
   if (!raw) return null
-  const first = raw.split(/[\n,]/)[0]?.trim()
-  return first && /^https?:\/\//.test(first) ? first : null
+  let first = raw
+  try {
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) first = parsed[0]
+  } catch {
+    // 단일 URL 문자열
+  }
+  return typeof first === 'string' && /^https?:\/\//.test(first.trim()) ? first.trim() : null
 }
 
 /**
