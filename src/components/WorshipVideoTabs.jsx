@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { WORSHIP_VIDEO_TABS } from '../constants'
+import YouTubePlaylist from './YouTubePlaylist'
 
 export default function WorshipVideoTabs() {
   const [activeTab, setActiveTab] = useState(0)
@@ -33,14 +34,7 @@ export default function WorshipVideoTabs() {
           {tab.playlistId ? (
             <>
               <div className="aspect-video rounded-xl overflow-hidden bg-black">
-                <iframe
-                  key={tab.playlistId}
-                  src={`https://www.youtube.com/embed/videoseries?list=${tab.playlistId}`}
-                  title={`${tab.label} 재생목록`}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  className="w-full h-full"
-                />
+                <YouTubePlaylist key={tab.playlistId} playlistId={tab.playlistId} title={`${tab.label} 재생목록`} />
               </div>
               <div className="mt-3 text-right">
                 <a

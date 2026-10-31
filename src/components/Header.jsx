@@ -23,6 +23,8 @@ export default function Header() {
             <img
               src="/logo.png"
               alt={CHURCH_NAME}
+              width="584"
+              height="160"
               className="h-10 w-auto max-w-[160px] object-contain"
               onError={() => setLogoError(true)}
             />

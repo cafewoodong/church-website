@@ -1,4 +1,5 @@
 import { SERMON_VIDEOS, PLACEHOLDER_PLAYLIST_ID } from '../constants'
+import YouTubePlaylist from './YouTubePlaylist'
 
 function VideoCard({ label, playlistId }) {
   const isPlaceholder = !playlistId || playlistId === PLACEHOLDER_PLAYLIST_ID
@@ -16,13 +17,7 @@ function VideoCard({ label, playlistId }) {
         </div>
       ) : (
         <div className="aspect-video rounded-xl overflow-hidden border border-gray-100 shadow-sm">
-          <iframe
-            className="w-full h-full"
-            src={`https://www.youtube.com/embed/videoseries?list=${playlistId}`}
-            title={label}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
+          <YouTubePlaylist playlistId={playlistId} title={label} />
         </div>
       )}
     </div>
