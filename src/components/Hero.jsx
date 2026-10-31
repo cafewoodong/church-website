@@ -1,5 +1,11 @@
 import { Link } from 'react-router-dom'
-import { CHURCH_NAME, CHURCH_TAGLINE, CHURCH_DESC } from '../constants'
+import {
+  CHURCH_NAME,
+  CHURCH_TAGLINE,
+  CHURCH_DESC,
+  CHURCH_ADDRESS,
+  WORSHIP_SCHEDULE,
+} from '../constants'
 
 export default function Hero() {
   return (
@@ -31,9 +37,35 @@ export default function Hero() {
         <p className="text-lg text-church-green font-semibold mb-3 break-keep">
           {CHURCH_TAGLINE}
         </p>
-        <p className="text-gray-500 mb-8 break-keep text-sm md:text-base leading-relaxed">
+        <p className="text-gray-500 mb-6 break-keep text-sm md:text-base leading-relaxed">
           {CHURCH_DESC}
         </p>
+
+        {/*
+          검색으로 들어오는 분들이 가장 먼저 찾는 것은 "몇 시에 예배하나, 어디인가"
+          두 가지다. 스크롤하지 않아도 보이도록 첫 화면에 둔다.
+        */}
+        <div className="mb-7 inline-block rounded-2xl border border-church-green/25 bg-white/85 px-5 py-4">
+          <dl className="space-y-2">
+            {WORSHIP_SCHEDULE.map((s) => (
+              <div key={s.name} className="flex flex-wrap items-baseline gap-x-3">
+                <dt className="w-20 shrink-0 text-sm text-church-muted">{s.name}</dt>
+                <dd className="text-lg font-bold text-church-text">{s.time}</dd>
+                <dd className="text-sm text-church-muted">{s.day}</dd>
+              </div>
+            ))}
+          </dl>
+          <Link
+            to="/location"
+            className="mt-3 flex flex-wrap items-baseline gap-x-3 border-t border-church-green/15 pt-3 text-sm hover:text-church-green"
+          >
+            <span className="w-20 shrink-0 text-church-muted">오시는 길</span>
+            <span className="break-keep text-church-text underline decoration-church-green/40 underline-offset-4">
+              {CHURCH_ADDRESS}
+            </span>
+          </Link>
+        </div>
+
         <div className="flex flex-wrap gap-3">
           <Link
             to="/videos"
