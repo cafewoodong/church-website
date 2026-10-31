@@ -36,10 +36,21 @@ export default function Footer() {
             <h3 className="text-white text-sm font-semibold mb-4">바로가기</h3>
             <ul className="space-y-2">
               {NAV_ITEMS.filter((i) => !i.highlight).map((item) => (
-                <li key={item.to}>
-                  <Link to={item.to} className="text-xs text-gray-400 hover:text-church-green transition-colors">
-                    {item.label}
-                  </Link>
+                <li key={item.to || item.href}>
+                  {item.external ? (
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-gray-400 hover:text-church-green transition-colors"
+                    >
+                      {item.label}
+                    </a>
+                  ) : (
+                    <Link to={item.to} className="text-xs text-gray-400 hover:text-church-green transition-colors">
+                      {item.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

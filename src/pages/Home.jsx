@@ -1,3 +1,4 @@
+import Seo from '../components/Seo'
 import Hero from '../components/Hero'
 import VideoSection from '../components/VideoSection'
 import WorshipInfo from '../components/WorshipInfo'
@@ -7,6 +8,7 @@ import LocationSection from '../components/LocationSection'
 export default function Home() {
   return (
     <>
+      <Seo />
       <Hero />
       <VideoSection />
       <WorshipInfo />

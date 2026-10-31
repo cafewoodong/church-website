@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import Seo from '../components/Seo'
 import PageHeader from '../components/PageHeader'
+import { PAGE_SEO } from '../seo'
 import NewsCard from '../components/NewsCard'
 import { getAllNews, getCommentCounts } from '../services/newsService'
 import useIsAdmin from '../hooks/useIsAdmin'
@@ -24,6 +26,7 @@ export default function News() {
 
   return (
     <>
+      <Seo {...PAGE_SEO.news} />
       <PageHeader
         title="교회 소식"
         subtitle="광교우리동네교회의 소식과 공지를 전합니다."

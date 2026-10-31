@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+
+# 네이버
+User-agent: Yeti
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+
+Sitemap: https://woodong.or.kr/sitemap.xml

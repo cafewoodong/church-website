@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import Seo from '../components/Seo'
 import PageHeader from '../components/PageHeader'
+import { PAGE_SEO } from '../seo'
 
 const MOTTO = '예수 그리스도의 증인된 삶, 복음의 열매 맺는 교회'
 
@@ -50,6 +52,7 @@ export default function About() {
 
   return (
     <>
+      <Seo {...PAGE_SEO.about} />
       <PageHeader title="교회 소개" subtitle="광교우리동네교회를 소개합니다." />
 
       <section className="bg-white px-4">
