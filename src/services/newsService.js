@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { NEWS } from '../data/news'
+import { resizeImage } from '../lib/resizeImage'
 
 // 정적 데이터 폴백 (Supabase 연결 실패 또는 데이터 없을 때)
 const staticFallback = (limit) => {
@@ -124,9 +125,13 @@ export async function deleteNews(id) {
 }
 
 export async function uploadNewsImage(file) {
-  const ext = file.name.split('.').pop()
+  // 올리기 전에 줄인다. 카카오톡 미리보기와 교인들 데이터 사용량에 직접 영향을 준다.
+  const image = await resizeImage(file)
+  const ext = image.name.split('.').pop()
   const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-  const { error } = await supabase.storage.from('news-images').upload(path, file)
+  const { error } = await supabase.storage
+    .from('news-images')
+    .upload(path, image, { contentType: image.type })
   if (error) throw error
   const { data } = supabase.storage.from('news-images').getPublicUrl(path)
   return data.publicUrl
