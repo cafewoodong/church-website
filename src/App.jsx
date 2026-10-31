@@ -11,6 +11,7 @@ import News from './pages/News'
 import NewsDetail from './pages/NewsDetail'
 import Location from './pages/Location'
 import Giving from './pages/Giving'
+import NotFound from './pages/NotFound'
 
 import ProtectedAdmin from './admin/components/ProtectedAdmin'
 import AdminLogin from './admin/pages/AdminLogin'
@@ -30,9 +31,10 @@ function MainLayout() {
   )
 }
 
-export default function App() {
+/** 라우트 정의. 브라우저에서는 BrowserRouter, 빌드 시 프리렌더에서는 StaticRouter가 감싼다. */
+export function AppRoutes() {
   return (
-    <BrowserRouter>
+    <>
       <ScrollToTop />
       <Routes>
         {/* 관리자 (교회 Header/Footer 없음) */}
@@ -54,8 +56,17 @@ export default function App() {
           <Route path="/news/:id" element={<NewsDetail />} />
           <Route path="/location" element={<Location />} />
           <Route path="/giving" element={<Giving />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
+    </>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppRoutes />
     </BrowserRouter>
   )
 }

@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 .env
 .env.local
+
+# wrangler 로컬 변수
+.dev.vars
+.wrangler
