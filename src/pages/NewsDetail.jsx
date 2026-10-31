@@ -4,6 +4,7 @@ import { CHURCH_NAME } from '../constants'
 import { getNewsById, incrementView } from '../services/newsService'
 import useIsAdmin from '../hooks/useIsAdmin'
 import { RETURN_TO_COMMENTS_KEY } from '../hooks/useAuthUser'
+import Seo from '../components/Seo'
 import ReactionBar from '../components/news/ReactionBar'
 import ImageCarousel from '../components/news/ImageCarousel'
 import CommentSection from '../components/news/CommentSection'
@@ -75,6 +76,13 @@ export default function NewsDetail() {
   const images = parseImageUrls(image_url)
 
   return (
+    <>
+      <Seo
+        title={title}
+        description={summary || `${CHURCH_NAME} 교회 소식`}
+        image={images[0]}
+        type="article"
+      />
     <section className="py-8 md:py-12 bg-church-bg px-4">
       <div className="max-w-[720px] mx-auto">
         <div className="flex items-center justify-between mb-4">
@@ -156,5 +164,6 @@ export default function NewsDetail() {
         </article>
       </div>
     </section>
+    </>
   )
 }

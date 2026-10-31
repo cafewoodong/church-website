@@ -1,4 +1,6 @@
+import Seo from '../components/Seo'
 import PageHeader from '../components/PageHeader'
+import { PAGE_SEO } from '../seo'
 import { CHURCH_ADDRESS, CHURCH_PHONE, CHURCH_EMAIL, CHURCH_NAME, CHURCH_ZIPCODE } from '../constants'
 
 export default function Location() {
@@ -6,6 +8,7 @@ export default function Location() {
 
   return (
     <>
+      <Seo {...PAGE_SEO.location} />
       <PageHeader title="찾아오시는 길" subtitle="광교우리동네교회 위치 안내입니다." />
 
       <section className="py-14 bg-white px-4">

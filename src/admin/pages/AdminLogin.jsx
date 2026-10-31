@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import Seo from '../../components/Seo'
 
 export default function AdminLogin() {
   const navigate = useNavigate()
@@ -36,6 +37,7 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen bg-church-bg flex items-center justify-center px-4">
+      <Seo title="관리자 로그인" noindex />
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 w-full max-w-sm">
 
         <div className="text-center mb-8">

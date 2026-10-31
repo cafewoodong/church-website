@@ -1,10 +1,13 @@
+import Seo from '../components/Seo'
 import PageHeader from '../components/PageHeader'
+import { PAGE_SEO } from '../seo'
 import WorshipVideoTabs from '../components/WorshipVideoTabs'
 import { WORSHIP_SCHEDULE } from '../constants'
 
 export default function Worship() {
   return (
     <>
+      <Seo {...PAGE_SEO.worship} />
       <PageHeader title="예배 안내" subtitle="광교우리동네교회의 예배 시간과 장소를 안내합니다." />
 
       <section className="py-14 bg-white px-4">

@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import Seo from '../components/Seo'
 import PageHeader from '../components/PageHeader'
+import { PAGE_SEO } from '../seo'
 import { BANK_NAME, BANK_ACCOUNT, BANK_HOLDER } from '../constants'
 
 const OFFERING_TYPES = ['십일조', '감사헌금', '주일헌금', '선교헌금', '건축헌금', '기타헌금']
@@ -16,6 +18,7 @@ export default function Giving() {
 
   return (
     <>
+      <Seo {...PAGE_SEO.giving} />
       <PageHeader title="온라인 헌금" subtitle="계좌이체로 편리하게 헌금하실 수 있습니다." />
 
       <section className="py-14 bg-white px-4">

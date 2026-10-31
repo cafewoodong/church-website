@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import Seo from '../../components/Seo'
 
 export default function AdminLayout({ children }) {
   const navigate = useNavigate()
@@ -11,6 +12,7 @@ export default function AdminLayout({ children }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Seo title="관리자" noindex />
       <header className="bg-church-header text-white px-6 py-3 flex items-center justify-between">
         <nav className="flex items-center gap-6">
           <Link to="/admin" className="font-bold text-sm text-white">
